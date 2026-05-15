@@ -17,8 +17,8 @@ curl -fsSL https://raw.githubusercontent.com/kernalix7/ai-project-setup/main/AI_
 ./tmp-igbkp/verify-setup.sh   # → Pass: 83  Fail: 0  Warn: 0
 </code></pre>
 
-[![Stable](https://img.shields.io/badge/status-stable-2EA44F?style=for-the-badge)](#-status-v51-stable)
-[![Latest](https://img.shields.io/badge/latest-v5.1-2962FF?style=for-the-badge)](AI_PROJECT_SETUP.md)
+[![Stable](https://img.shields.io/badge/status-stable-2EA44F?style=for-the-badge)](#-status-v52-stable)
+[![Latest](https://img.shields.io/badge/latest-v5.2-2962FF?style=for-the-badge)](AI_PROJECT_SETUP.md)
 
 [![license](https://img.shields.io/github/license/kernalix7/ai-project-setup?style=flat-square&color=blue)](LICENSE)
 [![markdown](https://img.shields.io/badge/markdown-CommonMark-083FA1?style=flat-square&logo=markdown&logoColor=white)](AI_PROJECT_SETUP.md)
@@ -44,9 +44,9 @@ curl -fsSL https://raw.githubusercontent.com/kernalix7/ai-project-setup/main/AI_
 
 ---
 
-### 📌 Status: v5.1 stable
+### 📌 Status: v5.2 stable
 
-> ai-project-setup ships a **single-file bootstrap** (`AI_PROJECT_SETUP.md`, ~7,600 lines) that any AI coding assistant reads and executes to produce a complete, multi-tool, gitignored AI tooling layout. v5.1 moved the self-update source from a gist to this repository, so projects on v5.0 or earlier fetch v5.1 once from the legacy gist (frozen as a migration bridge), then all subsequent updates come from here. The artifact is **idempotent and self-healing** — re-running setup on an existing project repairs drift, force-overwrites stale shipped scripts with `.bak` backups, and preserves user content (`CLAUDE.md` sections 1–7 and 11, memory files, project agents).
+> ai-project-setup ships a **single-file bootstrap** (`AI_PROJECT_SETUP.md`, ~7,600 lines) that any AI coding assistant reads and executes to produce a complete, multi-tool, gitignored AI tooling layout. v5.2 is the first polished GitHub repository release: expanded README, bilingual standard docs, issue/PR templates, and stricter no-footprint `.gitignore`. v5.1 moved the self-update source from a gist to this repository, so projects on v5.0 or earlier fetch v5.1 once from the legacy gist (frozen as a migration bridge), then all subsequent updates come from here. The artifact is **idempotent and self-healing** — re-running setup on an existing project repairs drift, force-overwrites stale shipped scripts with `.bak` backups, and preserves user content (`CLAUDE.md` sections 1–7 and 11, memory files, project agents).
 
 **One file, every AI tool.** Drop [`AI_PROJECT_SETUP.md`](AI_PROJECT_SETUP.md) at your project root, tell the AI to read it, and in 1–3 minutes you have rules, hooks, session-resume, slash commands, default agents, a backup toolkit, and bilingual GitHub standard files — all gitignored so your project git history stays clean. **Absolute Rule #19**: AI tooling leaves zero footprint in your project's git history.
 
@@ -203,7 +203,7 @@ your-project/
   - Replaces archived setup file
   - Force-overwrites all 30+ shipped scripts with .bak backup
   - Re-runs automode-validate gate
-  - Reports: "Updated: v5.0 -> v5.1. Recommend /clear."
+  - Reports: "Updated: vOLD -> vNEW. Recommend /clear."
 ```
 
 ### Three setup scenarios
@@ -440,8 +440,8 @@ Open an issue or PR at <https://github.com/kernalix7/ai-project-setup>. See [CON
 
 ## 🗺️ Roadmap
 
-- **v5.2** — `.devcontainer/` template, GitHub Actions workflow for setup verification
-- **v5.3** — Native Windows PowerShell hooks (experimental)
+- **v5.3** — `.devcontainer/` template, GitHub Actions workflow for setup verification
+- **v5.4** — Native Windows PowerShell hooks (experimental)
 - **v6.0** — Pluggable rule modules (`.priv-storage/.claude/rules/<lang>/`)
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
