@@ -201,52 +201,36 @@ log "backup     $BACKUP_DIR ($BACKUP_COUNT items)"
 # 3. globalize toolkit (delegate to P1 deliverable)
 # ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
-# 2c. v5.x leftover cleanup (idempotent — only deletes if present)
+# 2c. v5.x cleanup — delegate to migrate-from-md.sh (single source of truth)
 # A project may carry a "v6.0" marker but still have v5.x cruft because
-# migrate-from-md was skipped or partial. Sweep it now so upgrade is total.
+# migrate-from-md was skipped or partial. Detect any v5.x signal and call
+# the migrator with --auto-confirm so we reuse its REMOVE list, CLAUDE.md
+# trim, and settings.json strip instead of duplicating logic here.
 # ---------------------------------------------------------------------------
-V5_FILES=(
+V5_SIGNALS=(
   ".priv-storage/AI_PROJECT_SETUP.md"
-  ".priv-storage/.claude/agents/explorer.md"
-  ".priv-storage/.claude/agents/code-reviewer.md"
-  ".priv-storage/.claude/agents/log-analyzer.md"
-  ".priv-storage/.claude/commands/status.md"
-  ".priv-storage/.claude/commands/recover.md"
-  ".priv-storage/.claude/commands/ship.md"
-  ".priv-storage/.claude/commands/health.md"
-  ".priv-storage/.claude/commands/save.md"
-  ".priv-storage/.claude/commands/clean.md"
-  ".priv-storage/.claude/commands/codex-brief.md"
-  ".priv-storage/.claude/commands/codex-review.md"
-  ".priv-storage/.claude/commands/codex-fix.md"
-  ".priv-storage/.claude/commands/codex-relay-status.md"
-  "tmp-igbkp/codex-relay-check.sh"
-  "tmp-igbkp/codex-relay-run.sh"
-  ".priv-storage/sessions/codex-brief.md"
-  ".priv-storage/sessions/codex-report.md"
-  ".priv-storage/sessions/claude-review.md"
-)
-V5_DIRS=(
   ".priv-storage/.claude/hooks"
   ".priv-storage/.claude/skills"
   ".priv-storage/.claude/output-styles"
   ".priv-storage/.claude/statusline"
-  ".priv-storage/sessions/codex-relay"
+  "tmp-igbkp/codex-relay-check.sh"
+  "tmp-igbkp/codex-relay-run.sh"
 )
-V5_PURGED=0
-for f in "${V5_FILES[@]}"; do
-  if [ -e "$PROJECT_ROOT/$f" ]; then
-    run "rm -f '$PROJECT_ROOT/$f'"
-    V5_PURGED=$((V5_PURGED + 1))
-  fi
+V5_DETECTED=0
+for s in "${V5_SIGNALS[@]}"; do
+  if [ -e "$PROJECT_ROOT/$s" ]; then V5_DETECTED=1; break; fi
 done
-for d in "${V5_DIRS[@]}"; do
-  if [ -e "$PROJECT_ROOT/$d" ]; then
-    run "rm -rf '$PROJECT_ROOT/$d'"
-    V5_PURGED=$((V5_PURGED + 1))
+if [ "$V5_DETECTED" = "1" ]; then
+  MIGRATE_SCRIPT="$LIB_DIR/migrate-from-md.sh"
+  if [ -f "$MIGRATE_SCRIPT" ]; then
+    MIGRATE_FLAGS="--auto-confirm"
+    [ "$DRY_RUN" = "1" ] && MIGRATE_FLAGS="$MIGRATE_FLAGS --dry-run"
+    log "v5.x cruft detected — delegating to migrate-from-md.sh $MIGRATE_FLAGS"
+    run "bash '$MIGRATE_SCRIPT' '$PROJECT_ROOT' $MIGRATE_FLAGS"
+  else
+    warn "v5.x cruft detected but $MIGRATE_SCRIPT missing — skip (cruft persists)"
   fi
-done
-[ "$V5_PURGED" -gt 0 ] && log "v5.x cleanup: purged $V5_PURGED legacy artifacts"
+fi
 
 GLOBALIZED=0
 if [ -x "$LIB_DIR/globalize-toolkit.sh" ] || [ -f "$LIB_DIR/globalize-toolkit.sh" ]; then
@@ -260,32 +244,10 @@ else
 fi
 
 # ---------------------------------------------------------------------------
-# 3b. strip stale hook refs from per-project settings.json
-# Old v5.x settings.json may still reference .claude/hooks/*.sh that were
-# deleted during the migration → "/bin/sh: .claude/hooks/PostToolUse.sh: No
-# such file or directory" on every tool call. The global plugin owns hooks
-# and statusline from v7.0; per-project settings doesn't need them.
-# We touch ONLY .priv-storage/.claude/settings.json (the project's AIPS
-# layer). ~/.claude/settings.json is the user's global config and we never
-# modify it — if it still has stale refs, the user must clean it manually.
+# 3b. settings.json cleanup — heads-up about user-global file only.
+# (Per-project .priv-storage/.claude/settings.json strip happens inside
+# migrate-from-md.sh which step 2c invokes.)
 # ---------------------------------------------------------------------------
-PROJ_SETTINGS="$PRIV/.claude/settings.json"
-if [ -f "$PROJ_SETTINGS" ] && grep -q '"hooks"\|"statusLine"' "$PROJ_SETTINGS" 2>/dev/null; then
-  if [ "$DRY_RUN" = "0" ]; then
-    cp "$PROJ_SETTINGS" "$PROJ_SETTINGS.v5.bak"
-    if command -v jq >/dev/null 2>&1; then
-      jq 'del(.hooks) | del(.statusLine)' "$PROJ_SETTINGS" > "$PROJ_SETTINGS.tmp" \
-        && mv "$PROJ_SETTINGS.tmp" "$PROJ_SETTINGS" \
-        && ok "settings   stripped .hooks + .statusLine from $PROJ_SETTINGS (backup: .v5.bak)"
-    else
-      warn "jq missing — settings.json left intact; you may see hook-not-found spam until you remove .hooks + .statusLine manually"
-    fi
-  else
-    log "(dry) would strip .hooks + .statusLine from $PROJ_SETTINGS"
-  fi
-fi
-
-# Heads-up for the user's global settings — never modified automatically.
 USER_SETTINGS="$HOME/.claude/settings.json"
 if [ -f "$USER_SETTINGS" ] && grep -q '"hooks"' "$USER_SETTINGS" 2>/dev/null; then
   warn "user-level $USER_SETTINGS has a .hooks block. If hook-not-found errors persist after upgrade, clean it manually:"
