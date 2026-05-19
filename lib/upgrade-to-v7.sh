@@ -200,10 +200,56 @@ log "backup     $BACKUP_DIR ($BACKUP_COUNT items)"
 # ---------------------------------------------------------------------------
 # 3. globalize toolkit (delegate to P1 deliverable)
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# 2c. v5.x leftover cleanup (idempotent — only deletes if present)
+# A project may carry a "v6.0" marker but still have v5.x cruft because
+# migrate-from-md was skipped or partial. Sweep it now so upgrade is total.
+# ---------------------------------------------------------------------------
+V5_FILES=(
+  ".priv-storage/AI_PROJECT_SETUP.md"
+  ".priv-storage/.claude/agents/explorer.md"
+  ".priv-storage/.claude/agents/code-reviewer.md"
+  ".priv-storage/.claude/agents/log-analyzer.md"
+  ".priv-storage/.claude/commands/status.md"
+  ".priv-storage/.claude/commands/recover.md"
+  ".priv-storage/.claude/commands/ship.md"
+  ".priv-storage/.claude/commands/health.md"
+  ".priv-storage/.claude/commands/save.md"
+  ".priv-storage/.claude/commands/clean.md"
+  ".priv-storage/.claude/commands/codex-brief.md"
+  ".priv-storage/.claude/commands/codex-review.md"
+  ".priv-storage/.claude/commands/codex-fix.md"
+  ".priv-storage/.claude/commands/codex-relay-status.md"
+  "tmp-igbkp/codex-relay-check.sh"
+  "tmp-igbkp/codex-relay-run.sh"
+  ".priv-storage/sessions/codex-brief.md"
+  ".priv-storage/sessions/codex-report.md"
+  ".priv-storage/sessions/claude-review.md"
+)
+V5_DIRS=(
+  ".priv-storage/.claude/hooks"
+  ".priv-storage/.claude/skills"
+  ".priv-storage/.claude/output-styles"
+  ".priv-storage/.claude/statusline"
+  ".priv-storage/sessions/codex-relay"
+)
+V5_PURGED=0
+for f in "${V5_FILES[@]}"; do
+  if [ -e "$PROJECT_ROOT/$f" ]; then
+    run "rm -f '$PROJECT_ROOT/$f'"
+    V5_PURGED=$((V5_PURGED + 1))
+  fi
+done
+for d in "${V5_DIRS[@]}"; do
+  if [ -e "$PROJECT_ROOT/$d" ]; then
+    run "rm -rf '$PROJECT_ROOT/$d'"
+    V5_PURGED=$((V5_PURGED + 1))
+  fi
+done
+[ "$V5_PURGED" -gt 0 ] && log "v5.x cleanup: purged $V5_PURGED legacy artifacts"
+
 GLOBALIZED=0
 if [ -x "$LIB_DIR/globalize-toolkit.sh" ] || [ -f "$LIB_DIR/globalize-toolkit.sh" ]; then
-  # globalize-toolkit.sh takes flags only (no project_root arg) — operates
-  # on the plugin's own templates/tmp-igbkp/ → ~/.local/bin/aips-* symlinks
   GTK_FLAGS=""
   [ "$DRY_RUN" = "1" ] && GTK_FLAGS="--dry-run"
   run "bash '$LIB_DIR/globalize-toolkit.sh' $GTK_FLAGS"
@@ -211,6 +257,40 @@ if [ -x "$LIB_DIR/globalize-toolkit.sh" ] || [ -f "$LIB_DIR/globalize-toolkit.sh
   log "globalized toolkit (via globalize-toolkit.sh)"
 else
   warn "globalize-toolkit.sh not found in $LIB_DIR — skipped"
+fi
+
+# ---------------------------------------------------------------------------
+# 3b. strip stale hook refs from per-project settings.json
+# Old v5.x settings.json may still reference .claude/hooks/*.sh that were
+# deleted during the migration → "/bin/sh: .claude/hooks/PostToolUse.sh: No
+# such file or directory" on every tool call. The global plugin owns hooks
+# and statusline from v7.0; per-project settings doesn't need them.
+# We touch ONLY .priv-storage/.claude/settings.json (the project's AIPS
+# layer). ~/.claude/settings.json is the user's global config and we never
+# modify it — if it still has stale refs, the user must clean it manually.
+# ---------------------------------------------------------------------------
+PROJ_SETTINGS="$PRIV/.claude/settings.json"
+if [ -f "$PROJ_SETTINGS" ] && grep -q '"hooks"\|"statusLine"' "$PROJ_SETTINGS" 2>/dev/null; then
+  if [ "$DRY_RUN" = "0" ]; then
+    cp "$PROJ_SETTINGS" "$PROJ_SETTINGS.v5.bak"
+    if command -v jq >/dev/null 2>&1; then
+      jq 'del(.hooks) | del(.statusLine)' "$PROJ_SETTINGS" > "$PROJ_SETTINGS.tmp" \
+        && mv "$PROJ_SETTINGS.tmp" "$PROJ_SETTINGS" \
+        && ok "settings   stripped .hooks + .statusLine from $PROJ_SETTINGS (backup: .v5.bak)"
+    else
+      warn "jq missing — settings.json left intact; you may see hook-not-found spam until you remove .hooks + .statusLine manually"
+    fi
+  else
+    log "(dry) would strip .hooks + .statusLine from $PROJ_SETTINGS"
+  fi
+fi
+
+# Heads-up for the user's global settings — never modified automatically.
+USER_SETTINGS="$HOME/.claude/settings.json"
+if [ -f "$USER_SETTINGS" ] && grep -q '"hooks"' "$USER_SETTINGS" 2>/dev/null; then
+  warn "user-level $USER_SETTINGS has a .hooks block. If hook-not-found errors persist after upgrade, clean it manually:"
+  warn "  cp ~/.claude/settings.json ~/.claude/settings.json.v5.bak"
+  warn "  jq 'del(.hooks) | del(.statusLine)' ~/.claude/settings.json > /tmp/s.json && mv /tmp/s.json ~/.claude/settings.json"
 fi
 
 # 3-strict: delete per-project tmp-igbkp/*.sh after verifying global symlinks
