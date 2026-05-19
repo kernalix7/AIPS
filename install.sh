@@ -127,21 +127,25 @@ case "$UNAME" in
 esac
 
 # ---------- helpers ----------
-# claude_cmd: run a /command via claude --print with a hard timeout and
-# stdin from /dev/null so we never wait for confirmation prompts that
-# don't render under --print. Returns claude's exit code; caller can
-# inspect captured stdout.
-claude_cmd() {
-  if [ "$DRY_RUN" = "1" ]; then printf "  %s[dry-run]%s claude --print %q\n" "$C_DIM" "$C_RESET" "$1"; return 0; fi
-  local timeout_secs="${CLAUDE_CMD_TIMEOUT:-120}"
+# Run claude plugin subcommands non-interactively with a hard timeout.
+# These subcommands (claude plugin marketplace add | claude plugin install)
+# are the proper non-interactive entry points, unlike `claude --print
+# "/plugin install ..."` which goes through the slash-command UI and
+# may stall waiting for a confirm prompt.
+claude_plugin() {
+  if [ "$DRY_RUN" = "1" ]; then
+    printf "  %s[dry-run]%s claude plugin %s\n" "$C_DIM" "$C_RESET" "$*"
+    return 0
+  fi
+  local timeout_secs="${CLAUDE_CMD_TIMEOUT:-180}"
   if command -v timeout >/dev/null 2>&1; then
-    timeout "${timeout_secs}s" claude --print "$1" </dev/null 2>&1
+    timeout "${timeout_secs}s" claude plugin "$@" </dev/null 2>&1
   else
-    claude --print "$1" </dev/null 2>&1
+    claude plugin "$@" </dev/null 2>&1
   fi
 }
 
-# Plugin cache path for a given spec "name@marketplace".
+# Plugin cache path for spec "name@marketplace" — used to verify installs.
 plugin_cache_dir() {
   local spec="$1"
   local name="${spec%@*}"
@@ -149,77 +153,87 @@ plugin_cache_dir() {
   printf "%s/.claude/plugins/cache/%s/%s" "$HOME" "$market" "$name"
 }
 
-# Marketplace registration: try via claude --print first, fall back to
-# verifying ~/.claude/plugins/known_marketplaces.json directly so a hung
-# or silent claude run still moves the script forward.
+# Marketplace registration. Uses `claude plugin marketplace add <src>`,
+# then verifies via ~/.claude/plugins/known_marketplaces.json so the
+# script always knows whether the marketplace is actually registered.
 marketplace_add() {
   local src="$1" label="$2"
   detail "marketplace source: $src"
   if [ "$DRY_RUN" = "1" ]; then
-    claude_cmd "/plugin marketplace add $src" >/dev/null
+    claude_plugin marketplace add "$src" >/dev/null
     ok "marketplace added: $label (dry-run)"
     return 0
   fi
   local out rc=0
-  out="$(claude_cmd "/plugin marketplace add $src")" || rc=$?
+  out="$(claude_plugin marketplace add "$src")" || rc=$?
   if printf "%s" "$out" | grep -qiE "already (added|registered)|exists"; then
     ok "marketplace already registered: $label"
     return 0
   fi
-  # Verify via the registry file the user already had on disk.
   if [ -f "$HOME/.claude/plugins/known_marketplaces.json" ] \
        && grep -qiF "$src" "$HOME/.claude/plugins/known_marketplaces.json" 2>/dev/null; then
     ok "marketplace registered: $label"
     return 0
   fi
   if [ "$rc" -eq 124 ]; then
-    warn "claude marketplace add timed out after ${CLAUDE_CMD_TIMEOUT:-120}s — assuming registered (manual re-run safe)"
+    warn "marketplace add timed out after ${CLAUDE_CMD_TIMEOUT:-180}s ($label) — output: $(printf '%s' "$out" | tail -1)"
   else
-    warn "claude marketplace add returned $rc — proceeding (manual /plugin marketplace add $src may be needed)"
+    warn "marketplace add exit=$rc ($label) — output: $(printf '%s' "$out" | tail -1)"
   fi
+  return 1
 }
 
-# Plugin install: try claude --print, then verify the cache directory
-# exists. If verification fails after a non-zero claude exit, fall back
-# to running plugin install in a foreground TTY context (best-effort)
-# and surface a clear manual instruction.
+# Plugin install via `claude plugin install <spec> --scope user`.
+# After the call, verify the cache directory has content. Falls back
+# to /plugin update if the plugin was already installed.
 plugin_install() {
   local spec="$1" label="$2"
   detail "plugin spec: $spec"
   local cache_dir
   cache_dir="$(plugin_cache_dir "$spec")"
   if [ "$DRY_RUN" = "1" ]; then
-    claude_cmd "/plugin install $spec" >/dev/null
+    claude_plugin install "$spec" --scope user >/dev/null
     ok "$label installed (dry-run)"
     return 0
   fi
   local out rc=0
-  out="$(claude_cmd "/plugin install $spec")" || rc=$?
-  if printf "%s" "$out" | grep -qiE "already installed"; then
+  # Already installed? -> update path (subject to --no-plugin-update).
+  if [ -d "$cache_dir" ] && [ -n "$(ls -A "$cache_dir" 2>/dev/null)" ]; then
     if [ "$NO_PLUGIN_UPDATE" = "1" ]; then
-      warn "$label already installed — skipping update (--no-plugin-update)"
+      warn "$label already installed at $cache_dir — skipping update (--no-plugin-update)"
       return 0
     fi
-    detail "already installed — running /plugin update $spec"
-    claude_cmd "/plugin update $spec" >/dev/null 2>&1 || warn "$label update returned non-zero (continuing)"
-    ok "$label updated"
+    detail "already installed at $cache_dir — running claude plugin update $spec"
+    out="$(claude_plugin update "$spec")" || rc=$?
+    if [ "$rc" -eq 0 ]; then
+      ok "$label updated"
+    else
+      warn "$label update exit=$rc — continuing with existing install"
+    fi
     return 0
   fi
-  # Verify cache dir to confirm install actually happened.
+  # Fresh install.
+  out="$(claude_plugin install "$spec" --scope user)" || rc=$?
+  if printf "%s" "$out" | grep -qiE "already installed"; then
+    ok "$label already installed (per CLI)"
+    return 0
+  fi
+  # Verify cache dir was populated.
   if [ -d "$cache_dir" ] && [ -n "$(ls -A "$cache_dir" 2>/dev/null)" ]; then
     ok "$label installed (verified at $cache_dir)"
     return 0
   fi
   if [ "$rc" -eq 124 ]; then
-    warn "$label install timed out after ${CLAUDE_CMD_TIMEOUT:-120}s and cache dir is empty"
+    warn "$label install timed out after ${CLAUDE_CMD_TIMEOUT:-180}s"
   elif [ "$rc" -ne 0 ]; then
-    warn "$label install exit=$rc and cache dir is empty"
+    warn "$label install exit=$rc"
   else
-    warn "$label install returned 0 but cache dir is empty — possible interactive prompt under --print"
+    warn "$label install returned 0 but cache dir is empty"
   fi
-  echo "    Manual fallback: open a new claude session and run:"
-  echo "        /plugin install $spec"
-  echo "    Then re-run this installer to pick up where it left off."
+  echo "    CLI output (last 5 lines):"
+  printf "%s\n" "$out" | tail -5 | sed 's/^/      /'
+  echo "    Manual fallback:"
+  echo "        claude plugin install $spec --scope user"
   return 1
 }
 
