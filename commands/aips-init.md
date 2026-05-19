@@ -70,7 +70,9 @@ Output: `init: migrated v5.x → v7.0 — removed <N>, preserved <M> — verify:
    - **CUR == PLUGIN (same major.minor)** → idempotent re-init only:
      - For each managed template under `$AIPS_ROOT/templates/`, diff vs the project copy and apply non-destructive updates (skeleton headers, missing toolkit scripts in `tmp-igbkp/`).
      - NEVER overwrite `WORK_STATUS.md` body, `memory/*.md` content, or `sessions/*`.
-     - Re-validate symlinks and `.gitignore` block.
+     - Re-validate symlinks.
+     - **Always run** `bash "$AIPS_ROOT/lib/upgrade.sh" "$PROJECT_ROOT" --gitignore-only` so any AIPS lines still sitting in the per-project `.gitignore` get pruned even when the version marker is already current. Idempotent — does nothing if the file is already clean.
+     - Re-render `.priv-storage/.claude/settings.json` via `bash "$AIPS_ROOT/lib/render-settings-json.sh" "$PROJECT_ROOT"` to keep the statusLine pointer fresh after any plugin version bump.
      - Re-write marker to the full plugin version read from `"$AIPS_ROOT/.claude-plugin/plugin.json"` (never hardcode).
    - **CUR < PLUGIN (project marker older than plugin)** → upgrade in place:
      - Print a one-line summary: `upgrade: detected v$CUR, plugin v$PLUGIN — running lib/upgrade.sh`.
