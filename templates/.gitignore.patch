@@ -1,6 +1,0 @@
-# === AIPS v7.0 (project-specific overrides) ===
-# AIPS standard ignores live in ~/.config/git/ignore (global).
-# Add per-project entries below if needed (e.g., framework-specific build dirs).
-# To unignore an AIPS-default pattern in THIS project, use the `!pattern` form
-# (e.g., `!CLAUDE.local.md` to track a project-specific local override).
-# === /AIPS v7.0 ===
