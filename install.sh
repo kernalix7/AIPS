@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-# AIPS v6.0 installer — user-level, idempotent, no sudo.
+# AIPS v7.0 installer — user-level, idempotent, no sudo.
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/kernalix7/AIPS/main/install.sh | bash
 #   bash install.sh [--no-plugin-update] [--with codex,caveman,agentmemory,rtk] [--local-source <path>] [--dry-run]
+#
+# v7.0: After plugin install, globalizes templates/tmp-igbkp/*.sh as ~/.local/bin/aips-*
+# symlinks so per-project copies are no longer needed. Backup output stays per-project.
 
 set -euo pipefail
 
@@ -34,7 +37,7 @@ while [ $# -gt 0 ]; do
     --local-source=*)   LOCAL_SOURCE="${1#--local-source=}"; shift ;;
     --dry-run)          DRY_RUN=1; shift ;;
     -h|--help)
-      sed -n '2,6p' "$0"; exit 0 ;;
+      sed -n '2,8p' "$0"; exit 0 ;;
     *) err "unknown flag: $1"; exit 1 ;;
   esac
 done
@@ -47,7 +50,7 @@ run() {
 }
 
 # ---------- pre-checks ----------
-log "AIPS v6.0 installer — pre-flight checks"
+log "AIPS v7.0 installer — pre-flight checks"
 
 # bash >= 4.0
 if [ -z "${BASH_VERSINFO:-}" ] || [ "${BASH_VERSINFO[0]}" -lt 4 ]; then
@@ -183,10 +186,21 @@ if want agentmemory && [ "$UNAME" = "Linux" ] && command -v systemctl >/dev/null
   fi
 fi
 
+# ---------- F. Globalize toolkit scripts (v7.0+) ----------
+DRY_RUN_FLAG=""
+[ "$DRY_RUN" = "1" ] && DRY_RUN_FLAG="--dry-run"
+GLOBALIZE_SCRIPT="${HOME}/.claude/plugins/cache/AIPS/AIPS/lib/globalize-toolkit.sh"
+if [ -f "$GLOBALIZE_SCRIPT" ]; then
+  log "Globalizing toolkit scripts (v7.0)..."
+  bash "$GLOBALIZE_SCRIPT" $DRY_RUN_FLAG || warn "toolkit globalization failed (non-fatal)"
+else
+  warn "globalize-toolkit.sh not found at $GLOBALIZE_SCRIPT — skip (will retry on next /aips:init)"
+fi
+
 # ---------- Post-install report ----------
 echo
 if [ "$FAILED" = "0" ]; then
-  ok "AIPS v6.0 installed globally."
+  ok "AIPS v7.0 installed globally."
   ok "Dependency plugins: $WITH_DEPS"
   echo
   echo "In each project:"

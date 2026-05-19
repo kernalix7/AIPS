@@ -49,3 +49,71 @@ note: run /aips:update inside each project to sync per-project files.
 - Globals only. Never touch `.priv-storage/`, root symlinks, project source.
 - If marketplace refresh fails, abort before running any plugin update.
 - Surface any plugin update failure individually; do not abort the whole batch on one failure.
+
+---
+
+## Optional arg: `--to v7.0` (hybrid migration)
+
+When invoked as `/aips:upgrade --to v7.0` (or `/aips:upgrade --to v7.0 $ARGUMENTS`), perform the **v6.0 → v7.0 hybrid migration** for the current project instead of (or in addition to) the global plugin refresh.
+
+### Detection
+
+1. Read `.priv-storage/.aips-version` in the project root.
+   - If missing **and** `.priv-storage/CLAUDE.md` is present with the v6.0 section layout (Sections 1–7, 11) → treat as **v6.0**.
+   - If file reads `7.0` → abort with `already on v7.0 (no-op)`.
+   - If file reads anything else (e.g. `5.x`) → abort with `unsupported source version: <ver>; run /aips:migrate-from-md first`.
+
+### Plan preview
+
+Print the upgrade plan from `lib/upgrade-to-v7.sh --plan` (the PLAN block):
+
+```
+[plan] backup    → tmp-igbkp/upgrade-v7-backup-{ts}/
+[plan] globalize → hooks, skills, output-styles, statusline → ~/.claude/
+[plan] gitignore → strip per-project AIPS block, add to ~/.config/git/ignore
+[plan] memory    → mirror .priv-storage/memory/* → ~/.claude/projects/<encoded>/memory/, then prune
+[plan] sessions  → mirror .priv-storage/sessions/* → ~/.claude/sessions/<hash>/
+[plan] CLAUDE.md → trim Sections 8–13 ref comments (re-render via lib/render-claude-md.sh)
+[plan] marker    → write .priv-storage/.aips-version ← 7.0
+```
+
+### Confirm
+
+Prompt `Proceed? [Y/n]` (default Y).
+
+### Execute
+
+On confirm:
+
+```bash
+UPGRADE_SH="$(find ~/.claude/plugins/cache/AIPS/AIPS/lib -name upgrade-to-v7.sh 2>/dev/null | head -1)"
+[ -z "$UPGRADE_SH" ] && UPGRADE_SH="$(find ~/.claude/plugins -name upgrade-to-v7.sh 2>/dev/null | head -1)"
+bash "$UPGRADE_SH" "$(pwd)"
+```
+
+Pass-through flags: `--dry-run`, `--force` (e.g. `/aips:upgrade --to v7.0 --dry-run`).
+
+### Post-checks
+
+- Verify `.priv-storage/.aips-version` contains `7.0`.
+- Verify global mirror exists for memory + sessions.
+- Verify backup dir is non-empty.
+
+### Report
+
+```
+[upgrade-v7] backup     tmp-igbkp/upgrade-v7-backup-{ts}/  (N files)
+[upgrade-v7] globalized X files → ~/.claude/
+[upgrade-v7] preserved  Y files (per-project AIPS bits)
+[upgrade-v7] marker     .priv-storage/.aips-version = 7.0
+Upgraded to v7.0 — N files globalized, M files preserved, backup at tmp-igbkp/upgrade-v7-backup-{ts}/
+```
+
+### Rules (v7.0 path)
+
+- Backup **before** any destructive operation. Never delete a source file until its mirror is verified.
+- `--dry-run` prints the plan and exits without touching the FS.
+- `--force` skips the v6.0 pre-check (use only if state is known good but the marker is missing).
+- Still no AI attribution in any output.
+
+Without `--to v7.0`, behavior is unchanged from the section above (global plugin update only).

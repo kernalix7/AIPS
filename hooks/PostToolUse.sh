@@ -21,8 +21,17 @@ cd "$PROJECT_ROOT" 2>/dev/null || true
 # Graceful degradation: AIPS not initialized in this project.
 [[ -d "$PROJECT_ROOT/.priv-storage" ]] || exit 0
 
+# v7.0 path-hash for global sessions mirror
+aips_path_hash() {
+    echo -n "${1:-$PROJECT_ROOT}" | md5sum | cut -c1-12
+}
+
 SESSIONS_DIR="$PROJECT_ROOT/.priv-storage/sessions"
 CURRENT="$SESSIONS_DIR/current.md"
+
+# v7.0: global mirror at ~/.claude/sessions/{path-hash}/ preferred, local fallback
+PATH_HASH=$(aips_path_hash "$PROJECT_ROOT")
+GLOBAL_SESS="$HOME/.claude/sessions/$PATH_HASH"
 
 [[ -d "$SESSIONS_DIR" ]] || exit 0
 
@@ -123,6 +132,30 @@ if [[ -f "$CURRENT" ]]; then
             (cd "$PROJECT_ROOT" && git status --short 2>/dev/null | head -20) || true
             echo '```'
         } > "$RECOVERY" 2>/dev/null || true
+    fi
+fi
+
+# v7.0: global mirror — copy current.md + read-log.tsv to ~/.claude/sessions/{path-hash}/
+if [[ -n "$PROJECT_ROOT" ]] && [[ -d "$PROJECT_ROOT/.priv-storage" ]]; then
+    mkdir -p "$GLOBAL_SESS" 2>/dev/null || true
+    _aips_mirror_post() {
+        # Cap global current.md at 5000 lines via tail rotation
+        if [[ -f "$GLOBAL_SESS/current.md" ]] && [[ $(wc -l < "$GLOBAL_SESS/current.md") -gt 5000 ]]; then
+            tail -4000 "$GLOBAL_SESS/current.md" > "$GLOBAL_SESS/current.md.tmp" && mv "$GLOBAL_SESS/current.md.tmp" "$GLOBAL_SESS/current.md"
+        fi
+        [[ -f "$CURRENT" ]] && cp "$CURRENT" "$GLOBAL_SESS/current.md" 2>/dev/null || true
+        # Mirror read-log.tsv with same rotation policy as local (≤1000 → 800 tail)
+        if [[ -f "$SESSIONS_DIR/read-log.tsv" ]]; then
+            if [[ -f "$GLOBAL_SESS/read-log.tsv" ]] && [[ $(wc -l < "$GLOBAL_SESS/read-log.tsv") -gt 1000 ]]; then
+                tail -800 "$GLOBAL_SESS/read-log.tsv" > "$GLOBAL_SESS/read-log.tsv.tmp" && mv "$GLOBAL_SESS/read-log.tsv.tmp" "$GLOBAL_SESS/read-log.tsv"
+            fi
+            cp "$SESSIONS_DIR/read-log.tsv" "$GLOBAL_SESS/read-log.tsv" 2>/dev/null || true
+        fi
+    }
+    if command -v flock >/dev/null 2>&1; then
+        (flock -x -w 1 200 || exit 0; _aips_mirror_post) 200>"$GLOBAL_SESS/.lock" 2>/dev/null || true
+    else
+        _aips_mirror_post
     fi
 fi
 

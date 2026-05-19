@@ -10,8 +10,27 @@ trap 'rc=$?; [[ $rc -ne 0 ]] && printf "%s\tSessionStart.sh\trc=%d\tcmd=%s\n" "$
 
 PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$PROJECT_ROOT" 2>/dev/null || true
+
+# v7.0 path-hash for global sessions mirror
+aips_path_hash() {
+    echo -n "${1:-$PROJECT_ROOT}" | md5sum | cut -c1-12
+}
+
 SESSIONS_DIR="$PROJECT_ROOT/.priv-storage/sessions"
 WORK_STATUS="$PROJECT_ROOT/.priv-storage/WORK_STATUS.md"
+
+# v7.0: global mirror at ~/.claude/sessions/{path-hash}/ preferred, local fallback
+PATH_HASH=$(aips_path_hash "$PROJECT_ROOT")
+GLOBAL_SESS="$HOME/.claude/sessions/$PATH_HASH"
+
+# Resolve preferred source (global first, then local) for each artifact.
+# Picks whichever file exists; if both exist, prefer global per v7.0 hybrid policy.
+_aips_pick() {
+    local rel="$1" g="$GLOBAL_SESS/$1" l="$SESSIONS_DIR/$1"
+    if [[ -f "$g" ]]; then echo "$g"
+    elif [[ -f "$l" ]]; then echo "$l"
+    fi
+}
 
 # Plugin-active banner: emitted regardless of per-project init state.
 if [[ -d "$HOME/.claude/plugins/cache/AIPS/AIPS" ]] || [[ -d "$HOME/.claude/plugins/cache/AIPS" ]]; then
@@ -29,29 +48,34 @@ WORK_STATUS_LIMIT=40
 echo "==== SESSION RESUME CONTEXT (auto-loaded by SessionStart.sh, v4.1 budget cap ≤200 lines) ===="
 echo
 
-if [[ -f "$SESSIONS_DIR/recovery.md" ]]; then
-    AGE=$(( $(date +%s) - $(stat -c %Y "$SESSIONS_DIR/recovery.md" 2>/dev/null || stat -f %m "$SESSIONS_DIR/recovery.md") ))
+# v7.0: global mirror preferred for recovery.md
+RECOVERY_SRC="$(_aips_pick recovery.md)"
+if [[ -n "$RECOVERY_SRC" && -f "$RECOVERY_SRC" ]]; then
+    AGE=$(( $(date +%s) - $(stat -c %Y "$RECOVERY_SRC" 2>/dev/null || stat -f %m "$RECOVERY_SRC") ))
     if [[ "$AGE" -lt 86400 ]]; then
-        TOTAL=$(wc -l < "$SESSIONS_DIR/recovery.md")
-        echo "--- recovery.md (head -$RECOVERY_HEAD of $TOTAL lines; Read full file if needed) ---"
-        head -$RECOVERY_HEAD "$SESSIONS_DIR/recovery.md"
-        [[ "$TOTAL" -gt "$RECOVERY_HEAD" ]] && echo "[...truncated $((TOTAL-RECOVERY_HEAD)) more lines — Read .priv-storage/sessions/recovery.md for full]"
+        TOTAL=$(wc -l < "$RECOVERY_SRC")
+        echo "--- recovery.md (head -$RECOVERY_HEAD of $TOTAL lines; source: $RECOVERY_SRC) ---"
+        head -$RECOVERY_HEAD "$RECOVERY_SRC"
+        [[ "$TOTAL" -gt "$RECOVERY_HEAD" ]] && echo "[...truncated $((TOTAL-RECOVERY_HEAD)) more lines — Read $RECOVERY_SRC for full]"
         echo
     fi
 fi
 
-LATEST_HANDOFF=$(ls -t "$SESSIONS_DIR"/handoff-*.md 2>/dev/null | head -1)
+# v7.0: latest handoff — pick newest across global + local, prefer global on tie
+LATEST_HANDOFF=$(ls -t "$GLOBAL_SESS"/handoff-*.md "$SESSIONS_DIR"/handoff-*.md 2>/dev/null | head -1)
 if [[ -n "$LATEST_HANDOFF" ]]; then
     TOTAL=$(wc -l < "$LATEST_HANDOFF")
-    echo "--- $(basename "$LATEST_HANDOFF") (head -$HANDOFF_HEAD of $TOTAL lines) ---"
+    echo "--- $(basename "$LATEST_HANDOFF") (head -$HANDOFF_HEAD of $TOTAL lines; source: $LATEST_HANDOFF) ---"
     head -$HANDOFF_HEAD "$LATEST_HANDOFF"
     [[ "$TOTAL" -gt "$HANDOFF_HEAD" ]] && echo "[...truncated $((TOTAL-HANDOFF_HEAD)) more lines — Read $LATEST_HANDOFF for full]"
     echo
 fi
 
-if [[ -f "$SESSIONS_DIR/current.md" ]]; then
-    echo "--- current.md tail (last $CURRENT_TAIL entries) ---"
-    tail -$CURRENT_TAIL "$SESSIONS_DIR/current.md"
+# v7.0: global mirror preferred for current.md tail
+CURRENT_SRC="$(_aips_pick current.md)"
+if [[ -n "$CURRENT_SRC" && -f "$CURRENT_SRC" ]]; then
+    echo "--- current.md tail (last $CURRENT_TAIL entries; source: $CURRENT_SRC) ---"
+    tail -$CURRENT_TAIL "$CURRENT_SRC"
     echo
 fi
 

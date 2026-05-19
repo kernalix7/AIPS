@@ -134,6 +134,50 @@ else
   warn "rtk not on PATH — install via install.sh --with rtk (token savings disabled)"
 fi
 
+# ---------- 10. v7.0 memory dual-write health ----------
+section "10. v7.0 memory dual-write health"
+LOCAL_MEM_DIR="$ROOT/.priv-storage/memory"
+PATH_ENCODED="$(echo "$ROOT" | tr '/' '-')"
+GLOBAL_MEM_DIR="$HOME/.claude/projects/$PATH_ENCODED/memory"
+
+# Check 1: local memory files (warn if present in v7.0; should have been dropped on upgrade)
+if [ -d "$LOCAL_MEM_DIR" ]; then
+  LOCAL_FILES=$(find "$LOCAL_MEM_DIR" -maxdepth 2 -type f 2>/dev/null | wc -l | tr -d ' ')
+  if [ "$LOCAL_FILES" -gt 0 ]; then
+    warn "local .priv-storage/memory/ has $LOCAL_FILES file(s) — v7.0 deprecates local; run lib/upgrade-to-v7.sh"
+  else
+    pass "local .priv-storage/memory/ empty (v7.0-clean)"
+  fi
+else
+  pass "no local .priv-storage/memory/ (v7.0-clean)"
+fi
+
+# Check 2: global memory dir exists with files
+if [ -d "$GLOBAL_MEM_DIR" ]; then
+  GLOBAL_FILES=$(find "$GLOBAL_MEM_DIR" -type f 2>/dev/null | wc -l | tr -d ' ')
+  if [ "$GLOBAL_FILES" -gt 0 ]; then
+    pass "global memory present at $GLOBAL_MEM_DIR ($GLOBAL_FILES files)"
+  else
+    warn "global memory dir exists but empty: $GLOBAL_MEM_DIR"
+  fi
+else
+  warn "global memory dir missing: $GLOBAL_MEM_DIR (will be created on first save)"
+fi
+
+# Check 3: backup helper available
+HELPER_FOUND=""
+for cand in \
+    "$ROOT/lib/backup-global-memory.sh" \
+    "$HOME/.claude/plugins/cache/AIPS/AIPS/lib/backup-global-memory.sh" \
+    "$HOME/.local/share/aips/lib/backup-global-memory.sh"; do
+  if [ -f "$cand" ]; then HELPER_FOUND="$cand"; break; fi
+done
+if [ -n "$HELPER_FOUND" ]; then
+  pass "backup-global-memory.sh found at $HELPER_FOUND"
+else
+  warn "backup-global-memory.sh not found — archive.sh will skip global memory backup"
+fi
+
 # ---------- summary ----------
 printf "\n── summary ── %sPASS=%d%s  %sWARN=%d%s  %sFAIL=%d%s\n" \
   "$C_GREEN" "$PASS_N" "$C_RESET" \
