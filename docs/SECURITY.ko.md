@@ -14,7 +14,7 @@
 
 **공개 GitHub 이슈로 취약점을 신고하지 마세요.**
 
-[GitHub Security Advisories](https://github.com/kernalix7/ai-project-setup/security/advisories/new)를 통해 신고해 주세요.
+[GitHub Security Advisories](https://github.com/kernalix7/AIPS/security/advisories/new)를 통해 신고해 주세요.
 
 ### 포함할 내용
 

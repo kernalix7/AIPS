@@ -14,7 +14,7 @@ Security updates apply to the latest version on the `main` branch.
 
 **Do NOT report security vulnerabilities through public GitHub issues.**
 
-Report via [GitHub Security Advisories](https://github.com/kernalix7/ai-project-setup/security/advisories/new).
+Report via [GitHub Security Advisories](https://github.com/kernalix7/AIPS/security/advisories/new).
 
 ### What to Include
 

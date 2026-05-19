@@ -24,6 +24,6 @@ Examples of unacceptable behavior:
 
 ## Enforcement
 
-Instances of abusive behavior may be reported via [GitHub Security Advisories](https://github.com/kernalix7/ai-project-setup/security/advisories/new). All complaints will be reviewed and investigated.
+Instances of abusive behavior may be reported via [GitHub Security Advisories](https://github.com/kernalix7/AIPS/security/advisories/new). All complaints will be reviewed and investigated.
 
 This Code of Conduct is adapted from the [Contributor Covenant](https://www.contributor-covenant.org/), version 2.1.

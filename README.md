@@ -1,13 +1,13 @@
 <div align="center">
 
-# ai-project-setup
+# AIPS
 
 ### Drop one file. Tell your AI to read it. Done.
 
 <p>A single 7,000-line markdown bootstrap that turns <b>Claude Code, ChatGPT Codex CLI, Cursor, and GitHub Copilot</b> into a disciplined teammate — 13-section rules, 5 safety hooks, session-resume, dual-write memory, and bilingual GitHub files. <b>Zero install. One source of truth.</b></p>
 
 <pre><code># Fetch the bootstrap file
-curl -fsSL https://raw.githubusercontent.com/kernalix7/ai-project-setup/main/AI_PROJECT_SETUP.md > AI_PROJECT_SETUP.md
+curl -fsSL https://raw.githubusercontent.com/kernalix7/AIPS/main/AI_PROJECT_SETUP.md > AI_PROJECT_SETUP.md
 
 # Open your AI tool, then say:
 #   "Read AI_PROJECT_SETUP.md and execute it."
@@ -20,11 +20,11 @@ curl -fsSL https://raw.githubusercontent.com/kernalix7/ai-project-setup/main/AI_
 [![Stable](https://img.shields.io/badge/status-stable-2EA44F?style=for-the-badge)](#-status-v52-stable)
 [![Latest](https://img.shields.io/badge/latest-v5.2-2962FF?style=for-the-badge)](AI_PROJECT_SETUP.md)
 
-[![license](https://img.shields.io/github/license/kernalix7/ai-project-setup?style=flat-square&color=blue)](LICENSE)
+[![license](https://img.shields.io/github/license/kernalix7/AIPS?style=flat-square&color=blue)](LICENSE)
 [![markdown](https://img.shields.io/badge/markdown-CommonMark-083FA1?style=flat-square&logo=markdown&logoColor=white)](AI_PROJECT_SETUP.md)
 [![checks](https://img.shields.io/badge/checks-83%2B-2EA44F?style=flat-square)](AI_PROJECT_SETUP.md)
 [![scripts](https://img.shields.io/badge/scripts-9-blue?style=flat-square)](AI_PROJECT_SETUP.md)
-[![stars](https://img.shields.io/github/stars/kernalix7/ai-project-setup?style=flat-square&color=FFD93D&logo=github&logoColor=white)](https://github.com/kernalix7/ai-project-setup/stargazers)
+[![stars](https://img.shields.io/github/stars/kernalix7/AIPS?style=flat-square&color=FFD93D&logo=github&logoColor=white)](https://github.com/kernalix7/AIPS/stargazers)
 [![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
 
 ###### Works with
@@ -46,7 +46,7 @@ curl -fsSL https://raw.githubusercontent.com/kernalix7/ai-project-setup/main/AI_
 
 ### 📌 Status: v5.2 stable
 
-> ai-project-setup ships a **single-file bootstrap** (`AI_PROJECT_SETUP.md`, ~7,600 lines) that any AI coding assistant reads and executes to produce a complete, multi-tool, gitignored AI tooling layout. v5.2 is the first polished GitHub repository release: expanded README, bilingual standard docs, issue/PR templates, and stricter no-footprint `.gitignore`. v5.1 moved the self-update source from a gist to this repository, so projects on v5.0 or earlier fetch v5.1 once from the legacy gist (frozen as a migration bridge), then all subsequent updates come from here. The artifact is **idempotent and self-healing** — re-running setup on an existing project repairs drift, force-overwrites stale shipped scripts with `.bak` backups, and preserves user content (`CLAUDE.md` sections 1–7 and 11, memory files, project agents).
+> AIPS ships a **single-file bootstrap** (`AI_PROJECT_SETUP.md`, ~7,600 lines) that any AI coding assistant reads and executes to produce a complete, multi-tool, gitignored AI tooling layout. v5.2 is the first polished GitHub repository release: expanded README, bilingual standard docs, issue/PR templates, and stricter no-footprint `.gitignore`. v5.1 moved the self-update source from a gist to this repository, so projects on v5.0 or earlier fetch v5.1 once from the legacy gist (frozen as a migration bridge), then all subsequent updates come from here. The artifact is **idempotent and self-healing** — re-running setup on an existing project repairs drift, force-overwrites stale shipped scripts with `.bak` backups, and preserves user content (`CLAUDE.md` sections 1–7 and 11, memory files, project agents).
 
 **One file, every AI tool.** Drop [`AI_PROJECT_SETUP.md`](AI_PROJECT_SETUP.md) at your project root, tell the AI to read it, and in 1–3 minutes you have rules, hooks, session-resume, slash commands, default agents, a backup toolkit, and bilingual GitHub standard files — all gitignored so your project git history stays clean. **Absolute Rule #19**: AI tooling leaves zero footprint in your project's git history.
 
@@ -92,7 +92,7 @@ Every new project, you re-do the same AI setup. This file does it **once, determ
 One-liner (any git repository):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/kernalix7/ai-project-setup/main/AI_PROJECT_SETUP.md \
+curl -fsSL https://raw.githubusercontent.com/kernalix7/AIPS/main/AI_PROJECT_SETUP.md \
   > AI_PROJECT_SETUP.md
 ```
 
@@ -356,7 +356,7 @@ Trigger via natural language: `"AI_PROJECT_SETUP 업데이트해"` / `"update AI
 
 The AI:
 
-1. Fetches `https://raw.githubusercontent.com/kernalix7/ai-project-setup/main/AI_PROJECT_SETUP.md`
+1. Fetches `https://raw.githubusercontent.com/kernalix7/AIPS/main/AI_PROJECT_SETUP.md`
 2. Compares `Last Updated` line and version against local copy
 3. If newer: replaces `.priv-storage/AI_PROJECT_SETUP.md`, force-overwrites all 30+ shipped scripts with `.bak` backup
 4. Merges template sections of `CLAUDE.md` (§8/9/10/12/13) while preserving project content (§1–7, §11)
@@ -373,7 +373,7 @@ The AI:
 
 To point forks at your own repo for self-update:
 
-1. Edit [`AI_PROJECT_SETUP.md`](AI_PROJECT_SETUP.md) — replace both occurrences of `kernalix7/ai-project-setup` with `{your-user}/{your-repo}`:
+1. Edit [`AI_PROJECT_SETUP.md`](AI_PROJECT_SETUP.md) — replace both occurrences of `kernalix7/AIPS` with `{your-user}/{your-repo}`:
    - The repo URL in the **Source of Truth** block
    - The raw URL in the same block and in the self-update protocol Step 2
 2. Optionally remove the legacy gist URL block (only needed when migrating users from pre-v5.1).
@@ -433,7 +433,7 @@ Yes — that's the design. Claude Code reads `CLAUDE.md`, Codex/Copilot read `AG
 <details>
 <summary><b>I found a bug / want a feature.</b></summary>
 
-Open an issue or PR at <https://github.com/kernalix7/ai-project-setup>. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Open an issue or PR at <https://github.com/kernalix7/AIPS>. See [CONTRIBUTING.md](CONTRIBUTING.md).
 </details>
 
 ---
@@ -450,11 +450,11 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ## ⭐ Star history
 
-<a href="https://star-history.com/#kernalix7/ai-project-setup&Date">
+<a href="https://star-history.com/#kernalix7/AIPS&Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=kernalix7/ai-project-setup&type=Date&theme=dark" />
-    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=kernalix7/ai-project-setup&type=Date" />
-    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=kernalix7/ai-project-setup&type=Date" />
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=kernalix7/AIPS&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=kernalix7/AIPS&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=kernalix7/AIPS&type=Date" />
   </picture>
 </a>
 
@@ -462,7 +462,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ## 💛 Support
 
-If ai-project-setup saved you setup time:
+If AIPS saved you setup time:
 
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-F16061?logo=ko-fi&logoColor=white&style=for-the-badge)](https://ko-fi.com/kernalix7)
 [![Fairy](https://img.shields.io/badge/🧚_Fairy-EE6E73?style=for-the-badge&logoColor=white)](https://fairy.hada.io/@kernalix7)
@@ -477,6 +477,6 @@ Ko-fi handles international cards and PayPal; fairy.hada.io is a Korean tipping 
 
 <div align="center">
 
-[Report bug](https://github.com/kernalix7/ai-project-setup/issues/new?template=bug_report.md) &nbsp;·&nbsp; [Request feature](https://github.com/kernalix7/ai-project-setup/issues/new?template=feature_request.md) &nbsp;·&nbsp; [한국어 README](docs/README.ko.md)
+[Report bug](https://github.com/kernalix7/AIPS/issues/new?template=bug_report.md) &nbsp;·&nbsp; [Request feature](https://github.com/kernalix7/AIPS/issues/new?template=feature_request.md) &nbsp;·&nbsp; [한국어 README](docs/README.ko.md)
 
 </div>

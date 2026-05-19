@@ -7,8 +7,8 @@ Thanks for your interest in contributing!
 ## Development Setup
 
 ```bash
-git clone https://github.com/kernalix7/ai-project-setup.git
-cd ai-project-setup
+git clone https://github.com/kernalix7/AIPS.git
+cd AIPS
 ```
 
 No build step — `AI_PROJECT_SETUP.md` is the artifact.

@@ -22,6 +22,6 @@
 
 ## 시행
 
-학대 행위 사례는 [GitHub Security Advisories](https://github.com/kernalix7/ai-project-setup/security/advisories/new)를 통해 신고하실 수 있습니다.
+학대 행위 사례는 [GitHub Security Advisories](https://github.com/kernalix7/AIPS/security/advisories/new)를 통해 신고하실 수 있습니다.
 
 이 행동 강령은 [Contributor Covenant](https://www.contributor-covenant.org/) v2.1을 따릅니다.

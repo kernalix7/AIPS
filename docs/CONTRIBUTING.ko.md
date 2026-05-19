@@ -7,8 +7,8 @@
 ## 개발 환경 설정
 
 ```bash
-git clone https://github.com/kernalix7/ai-project-setup.git
-cd ai-project-setup
+git clone https://github.com/kernalix7/AIPS.git
+cd AIPS
 ```
 
 빌드 단계 없음 — `AI_PROJECT_SETUP.md` 자체가 산출물입니다.
