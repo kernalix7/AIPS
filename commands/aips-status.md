@@ -15,7 +15,7 @@ Show the AIPS state of the current project. Read-only — pure file reads, no an
 4. **CLAUDE.md sections present** — `grep -E '^## [0-9]+\.' .priv-storage/CLAUDE.md` → list section numbers found (expect 1-7 + 11).
 5. **Memory** — count files in `.priv-storage/memory/*.md`, total size, list category names.
 6. **Sessions** — for each of `current.md`, `recovery.md`, latest `handoff-*.md`: print filename + age (e.g. `current.md: 3m ago`, `handoff-2026-05-18.md: 1d ago`).
-7. **Dep plugins active** — for each of `agentmemory`, `cavecrew`, `rtk`, `codex-relay`: report `installed` / `missing` based on presence under `~/.claude/plugins/`.
+7. **Dep plugins active** — for each of `agentmemory`, `caveman`, `rtk`, `codex-plugin-cc`: report `installed` / `missing` based on presence under `~/.claude/plugins/`.
 8. **Root symlinks** — confirm `CLAUDE.md`, `AGENTS.md`, `.cursorrules`, `.vscode/settings.json` resolve into `.priv-storage/`.
 
 ## Output
@@ -29,7 +29,7 @@ Show the AIPS state of the current project. Read-only — pure file reads, no an
 [status] current.md          3m ago
 [status] recovery.md         2h ago
 [status] latest handoff      handoff-2026-05-18.md (1d ago)
-[status] dep plugins         agentmemory: installed, cavecrew: installed, rtk: installed, codex-relay: missing
+[status] dep plugins         agentmemory: installed, caveman: installed, rtk: installed, codex-plugin-cc: missing
 [status] root symlinks       4/4 valid
 ```
 

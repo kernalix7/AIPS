@@ -10,7 +10,7 @@ End-to-end health check across global plugin install, dependency plugins, and th
 ## Checks (one line per check, PASS / WARN / FAIL + 1-line note)
 
 1. **Global plugin present** — `~/.claude/plugins/AIPS/.claude-plugin/plugin.json` exists; report version.
-2. **Dependency plugins** — `agentmemory`, `cavecrew`, `rtk`, `codex-relay` (if applicable) installed in `~/.claude/plugins/`. Each listed individually.
+2. **Dependency plugins** — `agentmemory`, `caveman`, `rtk`, `codex-plugin-cc` (if applicable) installed in `~/.claude/plugins/`. Each listed individually.
 3. **agentmemory service active (Linux)** — `systemctl --user is-active agentmemory` returns `active`; on macOS check `launchctl list | grep agentmemory`; on other platforms WARN with "platform not auto-managed".
 4. **Per-project `.priv-storage/` complete** — verify presence of `CLAUDE.md`, `WORK_STATUS.md`, `memory/MEMORY.md`, `sessions/` dir. Missing → FAIL with list.
 5. **Root symlinks valid** — `CLAUDE.md`, `AGENTS.md`, `.cursorrules`, `.vscode/settings.json` resolve into `.priv-storage/`. Broken → FAIL.
@@ -24,7 +24,7 @@ End-to-end health check across global plugin install, dependency plugins, and th
 
 ```
 [health] global plugin       PASS  v6.0.0
-[health] dep plugins         PASS  agentmemory, cavecrew, rtk
+[health] dep plugins         PASS  agentmemory, caveman, rtk
 [health] agentmemory svc     PASS  active (systemd user)
 [health] .priv-storage/      PASS  4/4 required files
 [health] root symlinks       PASS  4/4 resolve

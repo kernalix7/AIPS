@@ -18,7 +18,7 @@ Refresh everything global: plugin marketplace metadata, the AIPS plugin, and eve
    claude --print "/plugin update AIPS@AIPS"
    ```
    Capture pre/post versions from `~/.claude/plugins/AIPS/.claude-plugin/plugin.json`.
-3. **Dependency plugins** — for each of `agentmemory`, `cavecrew`, `rtk`, `codex-relay` (when present):
+3. **Dependency plugins** — for each of `agentmemory`, `caveman`, `rtk`, `codex-plugin-cc` (when present):
    ```bash
    claude --print "/plugin update <name>@<marketplace>"
    ```
@@ -37,9 +37,9 @@ One line per plugin showing the version delta:
 [upgrade] marketplace        refreshed
 [upgrade] AIPS               v6.0.0 → v6.1.0
 [upgrade] agentmemory        v0.3.2 → v0.3.3
-[upgrade] cavecrew           v1.1.0 (no change)
+[upgrade] caveman           v1.1.0 (no change)
 [upgrade] rtk                v2.0.1 → v2.0.2
-[upgrade] codex-relay        not installed
+[upgrade] codex-plugin-cc        not installed
 [upgrade] agentmemory svc    restarted (version changed)
 note: run /aips:update inside each project to sync per-project files.
 ```
