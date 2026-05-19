@@ -2,28 +2,25 @@
 
 # AIPS
 
-### Drop one file. Tell your AI to read it. Done.
+### One curl. One slash command. Disciplined AI in every project.
 
-<p>A single 7,000-line markdown bootstrap that turns <b>Claude Code, ChatGPT Codex CLI, Cursor, and GitHub Copilot</b> into a disciplined teammate — 13-section rules, 5 safety hooks, session-resume, dual-write memory, and bilingual GitHub files. <b>Zero install. One source of truth.</b></p>
+<p>A <b>Claude Code plugin</b> that bootstraps disciplined AI tooling across every git project — global hooks/agents/commands, per-project rules, session resume, dual-write memory, statusline metrics, and Claude ↔ Codex relay. <b>Install once per machine. Init each project with one slash command.</b></p>
 
-<pre><code># Fetch the bootstrap file
-curl -fsSL https://raw.githubusercontent.com/kernalix7/AIPS/main/AI_PROJECT_SETUP.md > AI_PROJECT_SETUP.md
+<pre><code># 1. Once per machine
+curl -fsSL https://raw.githubusercontent.com/kernalix7/AIPS/main/install.sh | bash
 
-# Open your AI tool, then say:
-#   "Read AI_PROJECT_SETUP.md and execute it."
-#   "AI_PROJECT_SETUP.md 읽고 실행해줘"
-
-# 1–3 minutes later, verify:
-./tmp-igbkp/verify-setup.sh   # → Pass: 83  Fail: 0  Warn: 0
+# 2. Once per project
+cd my-project && claude
+> /aips:init
 </code></pre>
 
-[![Stable](https://img.shields.io/badge/status-stable-2EA44F?style=for-the-badge)](#-status-v52-stable)
-[![Latest](https://img.shields.io/badge/latest-v5.2-2962FF?style=for-the-badge)](AI_PROJECT_SETUP.md)
+[![Status](https://img.shields.io/badge/status-v6.0%20in%20development-FF8C00?style=for-the-badge)](.priv-storage/v6.0-PLAN.md)
+[![Latest](https://img.shields.io/badge/latest-v6.0--dev-2962FF?style=for-the-badge)](.priv-storage/v6.0-PLAN.md)
 
 [![license](https://img.shields.io/github/license/kernalix7/AIPS?style=flat-square&color=blue)](LICENSE)
-[![markdown](https://img.shields.io/badge/markdown-CommonMark-083FA1?style=flat-square&logo=markdown&logoColor=white)](AI_PROJECT_SETUP.md)
-[![checks](https://img.shields.io/badge/checks-83%2B-2EA44F?style=flat-square)](AI_PROJECT_SETUP.md)
-[![scripts](https://img.shields.io/badge/scripts-9-blue?style=flat-square)](AI_PROJECT_SETUP.md)
+[![plugin](https://img.shields.io/badge/Claude%20Code-plugin-7C3AED?style=flat-square&logo=anthropic&logoColor=white)](https://claude.com/claude-code)
+[![commands](https://img.shields.io/badge/slash%20commands-9-2EA44F?style=flat-square)](#slash-commands)
+[![deps](https://img.shields.io/badge/plugin%20deps-4-blue?style=flat-square)](#what-gets-installed)
 [![stars](https://img.shields.io/github/stars/kernalix7/AIPS?style=flat-square&color=FFD93D&logo=github&logoColor=white)](https://github.com/kernalix7/AIPS/stargazers)
 [![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
 
@@ -38,396 +35,378 @@ curl -fsSL https://raw.githubusercontent.com/kernalix7/AIPS/main/AI_PROJECT_SETU
 [![macOS](https://img.shields.io/badge/macOS-000000?style=flat-square&logo=apple&logoColor=white)](#)
 [![Windows](https://img.shields.io/badge/Windows-Git%20Bash-0078D6?style=flat-square&logo=windows&logoColor=white)](#)
 
-<sub>**English** &nbsp;·&nbsp; [한국어](docs/README.ko.md) &nbsp;·&nbsp; [Setup file](AI_PROJECT_SETUP.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md) &nbsp;·&nbsp; [Security](SECURITY.md) &nbsp;·&nbsp; [Changelog](CHANGELOG.md)</sub>
+<sub>**English** &nbsp;·&nbsp; [한국어](docs/README.ko.md) &nbsp;·&nbsp; [v6.0 plan](.priv-storage/v6.0-PLAN.md) &nbsp;·&nbsp; [Contributing](CONTRIBUTING.md) &nbsp;·&nbsp; [Security](SECURITY.md) &nbsp;·&nbsp; [Changelog](CHANGELOG.md)</sub>
 
 </div>
 
 ---
 
-### 📌 Status: v5.2 stable
+### Status: v6.0 in development
 
-> AIPS ships a **single-file bootstrap** (`AI_PROJECT_SETUP.md`, ~7,600 lines) that any AI coding assistant reads and executes to produce a complete, multi-tool, gitignored AI tooling layout. v5.2 is the first polished GitHub repository release: expanded README, bilingual standard docs, issue/PR templates, and stricter no-footprint `.gitignore`. v5.1 moved the self-update source from a gist to this repository, so projects on v5.0 or earlier fetch v5.1 once from the legacy gist (frozen as a migration bridge), then all subsequent updates come from here. The artifact is **idempotent and self-healing** — re-running setup on an existing project repairs drift, force-overwrites stale shipped scripts with `.bak` backups, and preserves user content (`CLAUDE.md` sections 1–7 and 11, memory files, project agents).
-
-**One file, every AI tool.** Drop [`AI_PROJECT_SETUP.md`](AI_PROJECT_SETUP.md) at your project root, tell the AI to read it, and in 1–3 minutes you have rules, hooks, session-resume, slash commands, default agents, a backup toolkit, and bilingual GitHub standard files — all gitignored so your project git history stays clean. **Absolute Rule #19**: AI tooling leaves zero footprint in your project's git history.
-
----
-
-## 📑 Table of contents
-
-- [Why this exists](#-why-this-exists)
-- [Quick start](#-quick-start)
-- [What gets created](#-what-gets-created)
-- [Lifecycle](#-lifecycle)
-- [Key features](#-key-features)
-- [Supported AI tools](#-supported-ai-tools)
-- [Comparison](#%EF%B8%8F-comparison)
-- [Documentation](#-documentation)
-- [Self-update](#-self-update)
-- [Forking](#-forking)
-- [FAQ](#-faq)
-- [Roadmap](#%EF%B8%8F-roadmap)
-- [Star history](#-star-history)
-- [Support](#-support)
-- [License](#-license)
-
----
-
-## 🎯 Why this exists
-
-Every new project, you re-do the same AI setup. This file does it **once, deterministically**, across multiple AI tools:
-
-| What you used to do every time | What this file does automatically |
-|---|---|
-| Write `CLAUDE.md` / `AGENTS.md` / `.cursorrules` by hand | ✅ 13 sections generated + 3-tool symlink sync |
-| Block dangerous commands (`rm -rf /`, force push, secret leaks) | ✅ Kernel-level `PreToolUse` hook |
-| Set up session resume for `/clear` · crash · rate-limit | ✅ 3-tier auto-save (current/handoff/recovery) |
-| Configure memory · slash commands · default agents | ✅ 10+ commands + 4 agents installed |
-| Create README / SECURITY / CONTRIBUTING / CHANGELOG | ✅ Bilingual EN/KO generation |
-| Stop AI tool files from leaking into git history | ✅ 22 `.gitignore` entries auto-applied |
-
----
-
-## ⚡ Quick start
-
-One-liner (any git repository):
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/kernalix7/AIPS/main/AI_PROJECT_SETUP.md \
-  > AI_PROJECT_SETUP.md
-```
-
-Then open your AI tool and tell it to execute the file:
-
-```bash
-claude       # or: codex, cursor ., or VS Code with Copilot
-```
-
-Tell the AI (English or Korean both work):
-
-> Read `AI_PROJECT_SETUP.md` and execute it.
+> **v5.2 (stable)** is the single-file bootstrap model (`AI_PROJECT_SETUP.md`, ~7,600 lines). You download it and tell the AI "read and execute this." v5.x users can keep using [`AI_PROJECT_SETUP.md`](AI_PROJECT_SETUP.md).
 >
-> `AI_PROJECT_SETUP.md 읽고 실행해줘`
-
-Wait 1–3 minutes, then verify:
-
-```bash
-./tmp-igbkp/verify-setup.sh
-# → Pass: 83  Fail: 0  Warn: 0 — All required checks passed
-```
-
-That's it. Everything created is gitignored — your project's git history stays clean.
+> **v6.0 (in development)** redistributes the same artifact as a **Claude Code plugin marketplace**. One `install.sh` per machine registers the marketplace in `~/.claude/` and installs/updates 4 dependency plugins; each project runs `/aips:init` once and **auto-branches** between fresh / v5.x migrate / re-init / repair. The 7,600-line markdown the AI used to parse every time is replaced by a deterministic install script + idempotent slash commands.
+>
+> This document describes **v6.0**. If you need v5.2, see the [v5.2 archive](AI_PROJECT_SETUP.md) or the [Korean README](docs/README.ko.md) v5.2 section.
 
 ---
 
-## 📦 What gets created
+## Table of contents
+
+- [Why this exists](#why-this-exists)
+- [Quick start](#quick-start)
+- [What gets installed](#what-gets-installed)
+- [Lifecycle](#lifecycle)
+- [Statusline](#statusline)
+- [Slash commands](#slash-commands)
+- [Migration from v5.x](#migration-from-v5x)
+- [Supported AI tools](#supported-ai-tools)
+- [Comparison](#comparison)
+- [Documentation](#documentation)
+- [FAQ](#faq)
+- [Roadmap](#roadmap)
+- [Star history](#star-history)
+- [Support](#support)
+- [License](#license)
+
+---
+
+## Why this exists
+
+v5.x worked, but every project required the AI to read and interpret a 7,600-line markdown file (~25k tokens, 1–3 minutes wait, occasional retry on failure). v6.0 moves to deterministic shell scripts and Claude Code's native plugin / skill / hook system, cutting per-project setup to **30 seconds** and removing the need for the AI to "understand" the artifact at all.
+
+| v5.x | v6.0 |
+|---|---|
+| Download a 7,600-line `.md` per project, AI executes it (~25k tokens, 1–3 min) | One install, then `/aips:init` per project (~30 sec) |
+| AI reads and interprets markdown → non-deterministic | Deterministic shell script + plugin manifest |
+| Self-update = AI fetches raw URL and rebuilds | `/aips:update` = marketplace pull + dependency update |
+| 9 toolkit scripts copied into each project `tmp-igbkp/` | Same 9 toolkit scripts, auto-synced via marketplace pull |
+| Custom `/codex-*` (×4) regenerated per project | `codex-plugin-cc` ships them globally as `/codex:*` |
+
+---
+
+## Quick start
+
+**Once per machine** (every project ever, run once):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/kernalix7/AIPS/main/install.sh | bash
+```
+
+What `install.sh` does:
+
+1. Registers the AIPS marketplace in `~/.claude/`
+2. Installs / updates 4 dependency plugins:
+   - **codex-plugin-cc** — `/codex:*` slash commands (Claude ↔ Codex relay)
+   - **caveman** — ultra-terse output style + `/caveman*` commands
+   - **agentmemory** + systemd unit — file-backed memory + auto-backup
+   - **RTK** (Rust Token Killer) — 60–90% token savings CLI proxy
+3. Drops global hooks / agents / commands / skills / output-styles / statusline into `~/.claude/`
+
+**Per project**:
+
+```bash
+cd my-project
+claude
+> /aips:init
+```
+
+`/aips:init` auto-branches:
+
+| Case | Trigger | Action |
+|---|---|---|
+| **A. Fresh** | No `.priv-storage/`, no v5.x `.md` at root | Fresh init (~30 sec) |
+| **B. v5.x migrate** | Root `AI_PROJECT_SETUP.md` (v5.x) detected | 1 confirm → backup → cleanup → v6.0 init |
+| **C. Re-init (idempotent)** | `.priv-storage/` v6.0 marker present | Idempotent re-init (drift repair) |
+| **D. Repair** | Broken / partial state detected | Repair mode |
+
+Done. Every artifact is gitignored — your git history stays clean. Verify any time with `/aips:health`.
+
+---
+
+## What gets installed
+
+v6.0 strictly separates **global** (once per machine) from **per-project** (`/aips:init`).
+
+### Global — `~/.claude/` (install.sh)
+
+| Category | Contents |
+|---|---|
+| Plugins | 4: `codex-plugin-cc`, `caveman`, `agentmemory` (+ systemd unit), `RTK` |
+| Hooks | 5: `PreToolUse`, `PostToolUse`, `SessionStart`, `PreCompact`, `Stop` |
+| Agents | 3 templates: `tech-lead`, `explorer`, `code-reviewer` |
+| Commands | 13: 9 `/aips:*` + dependency plugin commands |
+| Skills | On-demand knowledge modules (caveman, codex, etc.) |
+| Output styles | `terse` (default), `caveman/full`, `caveman/ultra`, etc. |
+| Statusline | 3-line multi-line (see preview below) |
+| Binaries | RTK Rust binary (`~/.local/bin/rtk`) |
+| Daemons | agentmemory systemd unit (user-level) |
+
+### Project — `.priv-storage/` (`/aips:init`)
 
 ```text
 your-project/
-|-- CLAUDE.md              -> symlink to .priv-storage/CLAUDE.md
-|-- AGENTS.md              -> symlink to .priv-storage/CLAUDE.md   # Codex / Copilot
-|-- .cursorrules           -> symlink to .priv-storage/CLAUDE.md   # Cursor
-|-- WORK_STATUS.md         -> current work state (project content)
+|-- CLAUDE.md              -> .priv-storage/CLAUDE.md  (symlink)
+|-- AGENTS.md              -> .priv-storage/CLAUDE.md  (symlink, Codex / Copilot)
+|-- .cursorrules           -> .priv-storage/CLAUDE.md  (symlink, Cursor)
+|-- WORK_STATUS.md         -> .priv-storage/WORK_STATUS.md
 |
-|-- .priv-storage/         [gitignored] all AI tooling lives here
-|   |-- CLAUDE.md                   # 13-section project rules (~10kB cap)
+|-- .priv-storage/         [gitignored] per-project AI state
+|   |-- CLAUDE.md                   # Sections 1-7 + 11 only, ~150 lines (v5.x was 13 sections, ~10kB)
 |   |-- CLAUDE.local.md             # per-developer overrides
-|   |-- POST_SETUP_INDEX.md         # 50-line pointer (saves ~25k tokens/session)
-|   |-- AI_PROJECT_SETUP.md         # archived, never re-read
-|   |-- memory/                     # dual-written to ~/.claude/projects/ (cross-machine sync)
-|   |-- sessions/                   # current.md, handoff-{date}.md, recovery.md, read-log.tsv
-|   `-- .claude/
-|       |-- settings.json           # statusLine + 5 hooks + outputStyle
-|       |-- hooks/                  # PreToolUse / PostToolUse / SessionStart / PreCompact / Stop
-|       |-- agents/                 # tech-lead, explorer, code-reviewer, log-analyzer
-|       |-- commands/               # 10+ slash commands
-|       |-- skills/ and rules/      # on-demand knowledge
-|       |-- output-styles/terse.md
-|       `-- statusline              # context percent / rate-limit ETA
+|   |-- WORK_STATUS.md              # current task state
+|   |-- memory/                     # agentmemory file-backed store
+|   |-- sessions/                   # current.md / handoff-{date}.md / recovery.md
+|   |-- agents/                     # tech-lead.md + per-team agents
+|   |-- .mcp.json                   # MCP server registry (env-var refs only)
+|   `-- .gitignore                  # 22 entries
 |
-|-- tmp-igbkp/             [gitignored] backup and verification toolkit (9 scripts)
-|   |-- verify-setup.sh             # one-command health check (83+ assertions)
-|   |-- smoke-test-hooks.sh         # mock-payload hook validation
-|   |-- secret-guard.sh             # 14-pattern pre-commit scanner
-|   |-- archive.sh / restore.sh     # AES-256-CBC + PBKDF2 600k iterations
-|   |-- purge-history.sh            # git-filter-repo wrapper
-|   |-- setup-worktree.sh           # bridges worktrees to main .priv-storage/
-|   |-- codex-relay-{check,run}.sh  # Claude <-> Codex parallel lanes
-|   `-- uninstall.sh                # safe rollback with backup
-|
-|-- .mcp.json              [gitignored] MCP server registry (env-var refs only)
-|
-|-- README.md, SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md, CHANGELOG.md
-|-- docs/{README,SECURITY,CONTRIBUTING,CODE_OF_CONDUCT,CHANGELOG}.ko.md
-`-- .github/{ISSUE_TEMPLATE/,PULL_REQUEST_TEMPLATE.md}
+`-- tmp-igbkp/             [gitignored] backup + verification toolkit (9 scripts)
+    |-- verify-setup.sh             # health check
+    |-- smoke-test-hooks.sh         # hook validation with mock payloads
+    |-- secret-guard.sh             # 14-pattern pre-commit scanner
+    |-- archive.sh / restore.sh     # AES-256-CBC + PBKDF2 600k iterations
+    |-- purge-history.sh            # git-filter-repo wrapper
+    |-- setup-worktree.sh           # worktree bridge
+    `-- uninstall.sh                # safe rollback
 ```
 
-> Only `WORK_STATUS.md`, GitHub standard files, the `docs/` Korean mirrors, and `.github/` get committed. Everything inside `.priv-storage/` and `tmp-igbkp/` is gitignored by design.
+> Only `WORK_STATUS.md`, GitHub standard files, the `docs/` Korean mirrors, and `.github/` get committed. Everything in `.priv-storage/` and `tmp-igbkp/` is gitignored on purpose. **`CLAUDE.md` is reduced to ~150 lines** (v5.x was ~10kB) — Sections 8 / 9 / 10 / 12 / 13 moved out into the global plugin / skill layer.
 
 ---
 
-## 🔄 Lifecycle
+## Lifecycle
 
 ```text
-[1. INITIAL SETUP]
-  Prompt: "Read AI_PROJECT_SETUP.md and execute it."
-  - Auto-detects Scenario A/B/C
-  - Creates everything above, then runs STEP 6
-  - Archives AI_PROJECT_SETUP.md into .priv-storage/
-  - Prints "Setup Complete" only if automode-validate.sh passes
-
+[1. Global install] (once per machine)
+  curl ... | bash
+  - Register AIPS marketplace → ~/.claude/
+  - Install/update 4 dependency plugins
+  - Drop hooks/agents/commands/skills/output-styles/statusline
+  - Install RTK binary, agentmemory systemd unit
         |
         v
-
-[2. NORMAL SESSIONS]
-  - SessionStart hook injects last handoff + current.md tail
-  - AI reads CLAUDE.md (~200 lines) + POST_SETUP_INDEX.md (~50)
-  - Does not re-read the 7000-line setup file, saving ~25k tokens/session
-  - PreToolUse blocks dangerous commands + oversized Reads
-  - PostToolUse appends to current.md + dual-writes memory
+[2. Project init] (once per project, ~30 sec)
+  cd project && claude → /aips:init
+  - Auto-branch A/B/C/D
+  - Create .priv-storage/ + tmp-igbkp/, drop 3 symlinks
+  - CLAUDE.md Sections 1-7 + 11 (~150 lines)
+  - Add 22 .gitignore entries
+        |
+        v
+[3. Normal session]
+  - SessionStart hook auto-injects prior handoff + current.md tail
+  - AI reads only CLAUDE.md (~150 lines) — no 7,600-line .md
+  - PreToolUse blocks dangerous commands + oversized reads
+  - PostToolUse appends current.md + dual-writes to agentmemory
   - Stop hook writes handoff-{date}.md
   - PreCompact hook writes recovery.md (best-effort)
-
+  - Stats accumulate: 3-line statusline updates live
         |
         v
-
-[3. CRASH / RATE-LIMIT / /clear]
-  - Next session: SessionStart auto-loads handoff + recovery
-  - AI resumes without "where were we?" questions
-
+[4. Crash / rate-limit / /clear]
+  - Next session, SessionStart auto-loads handoff + recovery
+  - AI resumes from prior state without asking "where were we?"
         |
         v
-
-[4. SELF-UPDATE]
-  Trigger: "update setup" or Korean "AI_PROJECT_SETUP 업데이트해"
-  - Fetches latest from GitHub raw URL
-  - Replaces archived setup file
-  - Force-overwrites all 30+ shipped scripts with .bak backup
-  - Re-runs automode-validate gate
-  - Reports: "Updated: vOLD -> vNEW. Recommend /clear."
+[5. Updates] (trigger: /aips:update)
+  - marketplace pull → update 4 dependency plugins
+  - Global hooks/commands auto-sync
+  - Projects untouched (re-init via /aips:init if needed)
 ```
 
-### Three setup scenarios
+---
 
-| Scenario | When | What the AI does |
-|----------|------|------------------|
-| **A — existing** | `.priv-storage/` exists or real `CLAUDE.md` at root | Update/repair in place. Force-overwrite shipped scripts (with `.bak`), preserve user content. |
-| **B — empty/new** | No `.priv-storage/`, no `CLAUDE.md` at root | Full setup from scratch — STEP 0 detection → STEPs 1–12 → archive. |
-| **C — broken** | Files at root that look like CLAUDE.md but aren't, or partial leftover state | Detect, classify, convert to canonical layout, then bridge into A's STEPs 4–12. |
+## Statusline
+
+3-line multi-line. Key signals at a glance.
+
+```
+project [main*3] wip:2 | opus-4.7 | ctx:8%(15.5k/200k) | cache:71%
+5h:8% ↻2h11m ∅1h23m | wk:12% ↻4d18h ∅2d4h
+🦴cv:75%/full | 🧠am:40%/127 | 💰rtk:34% | 🤖cdx:55%/3runs | 💯Σ:95%
+```
+
+| Line | Shows |
+|---|---|
+| 1 | Project name, git branch [commits since base], `wip` count, model, context usage, prompt cache hit rate |
+| 2 | 5-hour window usage + time until reset (`↻`) + projected empty ETA at current burn rate (`∅`); weekly window same |
+| 3 | caveman savings/intensity, agentmemory hit rate / observation count, RTK savings, codex delegation rate / runs, cumulative savings (`Σ`) |
+
+`↻` = time until reset, `∅` = projected empty ETA at current burn rate, `Σ` = cumulative savings (`Σ = 1 − Π(1 − SAVED_i / 100)`).
 
 ---
 
-## ✨ Key features
+## Slash commands
 
-<table>
-<tr><td width="50%">
+### AIPS native (9)
 
-**🛡️ Safety hooks** *(Claude Code)*
-- `PreToolUse` blocks `rm -rf /`, force push, `git add` of gitignored AI files, `eval`, `base64 | sh`, `curl http://`, `~/.ssh` reads, fork bombs
-- Blocks oversized `Read` (>1000 lines without `offset`/`limit`)
-- Blocks commit messages mentioning AI tooling
-- `PostToolUse` appends to `sessions/current.md` + dual-writes memory
-- `SessionStart` auto-loads last handoff + current.md tail + recovery
-- `PreCompact` writes recovery.md snapshot (best-effort)
-- `Stop` writes `handoff-{date}.md` + archives old handoffs
+| Command | Action |
+|---|---|
+| `/aips:init` | Auto-branched init (fresh / migrate / re-init / repair) |
+| `/aips:update` | marketplace pull + dependency plugin update |
+| `/aips:health` | `verify-setup.sh` + `smoke-test-hooks.sh` |
+| `/aips:status` | Current task + recent activity summary |
+| `/aips:migrate-from-md` | Explicit v5.x `.md` migration (manual case-B trigger) |
+| `/aips:upgrade` | v5.x → v6.0 + dependency plugin upgrade |
+| `/aips:repair` | Repair broken state (manual case-D trigger) |
+| `/aips:reset` | Reset project init (with backup) |
+| `/aips:uninstall` | Safe removal, global + project |
 
-</td><td width="50%">
+### Dependency plugin commands
 
-**🔄 Resilience**
-- 3-tier session log: `current.md` (every call) → `handoff-{date}.md` (session end) → `recovery.md` (pre-compact)
-- Memory dual-write: every memory file mirrors to `~/.claude/projects/{path-encoded}/memory/` → new laptop restores instantly
-- Idempotent setup: SHA256 markers in `.priv-storage/.setup-step-{N}.done`
-- Force-overwrite of shipped scripts on every update (with `.bak`) — stale bugs auto-resolve
-- 83+ assertion `verify-setup.sh` — single-command health check
-- `smoke-test-hooks.sh` fires each hook with mock payload
+| Plugin | Commands |
+|---|---|
+| codex-plugin-cc | `/codex:brief`, `/codex:review`, `/codex:fix`, `/codex:relay-status` |
+| caveman | `/caveman`, `/caveman:lite`, `/caveman:ultra`, `/caveman:wenyan-*` |
+| agentmemory | `/am:save`, `/am:recall`, `/am:reflect`, `/am:consolidate`, `/am:sessions` |
+| RTK | hook-based auto — no explicit command (`rtk gain` from shell) |
 
-</td></tr>
-<tr><td width="50%">
-
-**🤖 Default agents** *(token-efficient)*
-- **`tech-lead`** — auto-evaluates complexity, forms teams (modules ≥ 2 OR files ≥ 5 OR cross-module work)
-- **`explorer`** — read-only codebase search, returns summaries, preserves main context window
-- **`code-reviewer`** — security/correctness/style review
-- **`log-analyzer`** — parses crash logs / hook-error logs
-- Subagent delegation **MANDATORY** above thresholds (>3 files, >500 lines, codebase-wide search)
-
-</td><td width="50%">
-
-**⚡ Slash commands**
-- **`/status`** — current task + recent activity summary
-- **`/health`** — runs verify-setup.sh + smoke-test-hooks.sh
-- **`/recover`** — load latest handoff + recovery into context
-- **`/ship`** — pre-commit secret-guard + clean check
-- **`/save`** — manual snapshot to current.md
-- **`/clean`** — rotate old handoffs, prune sessions
-- **`/codex-{brief,review,fix,relay-status}`** — Claude ↔ Codex parallel lanes
-
-</td></tr>
-<tr><td width="50%">
-
-**💰 Token discipline** *(Absolute Rule #20)*
-- `CLAUDE.md` hard-capped at 16k chars (WARN) / 32k (FAIL)
-- `PreToolUse` **BLOCKS** `Read` of >1000-line files without `offset`/`limit`
-- Subagent delegation MANDATORY above thresholds
-- `read-log.tsv` flags duplicate Reads within a session
-- Auto-extends from terse → verbose only when reasoning is requested
-- **Expected: 30–60% token reduction vs naive AI-pair-programming**
-
-</td><td width="50%">
-
-**🔐 Secret guard**
-- 14 regex patterns: `AKIA…`, `ASIA…`, `sk-…`, `sk-proj-…`, `ghp_…`, `ghs_…`, `gho_…`, `glpat-…`, `xox[abprs]-…`, `sk_live_…`, `rk_live_…`, `AIza…`, JWTs, `-----BEGIN PRIVATE KEY-----`
-- Special `.mcp.json` rule — env-var references only
-- Per-line `# secret-guard:ignore` allow-list for false positives
-- `--install-hook` mode wires into git pre-commit
-- AES-256-CBC + PBKDF2 600k for archived backups
-
-</td></tr>
-<tr><td width="50%">
-
-**🌏 Multi-tool parity**
-- Same `CLAUDE.md` drives Claude Code, Codex CLI, Cursor, Copilot via symlinks
-- All three rule files (`CLAUDE.md` / `AGENTS.md` / `.cursorrules`) point to the same target — atomic updates
-- MCP servers registered via gitignored `.mcp.json` (env-var refs only)
-- VS Code settings symlinked for Copilot integration
-- Hooks are Claude Code-specific; other tools get policy-only enforcement
-
-</td><td width="50%">
-
-**🔀 Cross-AI Codex relay** *(v4.9+, Claude Code only)*
-- When `codex` CLI is on `PATH`, Claude offloads implementation to Codex while keeping planning/review authority
-- Flow: Claude *(plan)* → `/codex-brief` → Codex *(implement)* → Claude *(`/codex-review`)* → Codex *(`/codex-fix`)*
-- v5.0+ parallel per-agent relay lanes for TeamCreate work
-- Conflict prevention: disjoint allowed-paths per lane via `paths_overlap` check
-- Lockfiles in `.priv-storage/sessions/codex-relay/locks/` + `active.tsv` ledger
-
-</td></tr>
-</table>
+> The legacy custom `/codex-brief`, `/codex-review`, `/codex-fix`, `/codex-relay-status` from v5.x are **removed**. Use `/codex:*` from the official `codex-plugin-cc` instead.
 
 ---
 
-## 🤝 Supported AI tools
+## Migration from v5.x
 
-| Tool | Min version | Reads | Hook support |
-|------|-------------|-------|--------------|
-| **Claude Code** | 2.0+ | `CLAUDE.md` | ✅ Full (5 hook events) |
-| **ChatGPT Codex CLI** | 0.10+ | `AGENTS.md` → `CLAUDE.md` | ❌ Policy-only |
-| **Cursor** | 0.40+ | `.cursorrules` → `CLAUDE.md` | ❌ Policy-only |
-| **GitHub Copilot** | 1.150+ | `AGENTS.md` | ❌ Policy-only |
-| **claude.ai (web)** | current | upload `CLAUDE.md` | ❌ Policy-only |
-| **Any MCP-aware tool** | — | depends | ❌ Policy-only |
+**Automatic (recommended)** — just run `/aips:init` in the project:
 
-> *Policy-only* = rules enforced via prompt content. No kernel-level block, but the AI follows them because they're in the rules file it reads.
+```bash
+cd existing-v5-project
+claude
+> /aips:init
+# → Detects root AI_PROJECT_SETUP.md (v5.x)
+# → "v5.x install detected. Migrate to v6.0? [y/N]"
+# → On y:
+#   1. Full backup to .priv-storage/v5-backup/
+#   2. Reduce 7,600-line AI_PROJECT_SETUP.md → 30-line DEPRECATED redirect
+#   3. Remove custom /codex-* (4 commands) — replaced by codex-plugin-cc
+#   4. Remove tmp-igbkp/codex-relay-{check,run}.sh
+#   5. Slim CLAUDE.md down to Sections 1-7 + 11 only (~150 lines)
+#   6. Write v6.0 marker
+```
+
+**Manual** — `/aips:migrate-from-md` triggers the same flow explicitly.
+
+### Removed in v6.0
+
+- **7,600-line `AI_PROJECT_SETUP.md` execution model** → reduced to 30-line DEPRECATED redirect (downstream raw-URL compatibility preserved)
+- **Custom slash commands** `/codex-brief`, `/codex-review`, `/codex-fix`, `/codex-relay-status` → replaced by `codex-plugin-cc`'s `/codex:*`
+- **`tmp-igbkp/codex-relay-{check,run}.sh`** → codex-plugin-cc manages its own locks / ledger
+- **`CLAUDE.md` Sections 8 / 9 / 10 / 12 / 13** → moved into the global plugin / skill / hook layer; per-project `CLAUDE.md` keeps only Sections 1-7 + 11 (~150 lines)
 
 ---
 
-## ⚖️ Comparison
+## Supported AI tools
 
-| | This file | `.cursorrules` only | Custom CLAUDE.md | Per-tool CLI tool |
+**AIPS is built for Claude Code first.** Other tools get policy-only support via `CLAUDE.md` / `AGENTS.md` / `.cursorrules`; full plugin-like support for them is roadmap.
+
+### Tier 1 — Primary / Full
+
+| Tool | Min version | Reads | v6.0 features |
+|---|---|---|---|
+| **Claude Code (CLI)** | 2.0+ | `CLAUDE.md` | Full plugin install, 9 `/aips:*` slash commands, 5 hooks, 3-line statusline, output styles, 4 bundled dep plugins (codex-plugin-cc, caveman, agentmemory, RTK) |
+
+### Tier 2 — Partial (policy-only)
+
+| Tool | Min version | Reads | v6.0 features |
+|---|---|---|---|
+| **ChatGPT Codex CLI** | 0.10+ | `AGENTS.md` → `CLAUDE.md` | Rules only (no hooks / slash / statusline) |
+| **Cursor** | 0.40+ | `.cursorrules` → `CLAUDE.md` | Rules only |
+| **GitHub Copilot** | 1.150+ | `AGENTS.md` | Rules only |
+| **claude.ai (web)** | current | `CLAUDE.md` manual upload | Rules only |
+| **Any MCP-aware tool** | — | depends | `.mcp.json` only |
+
+> *Policy-only* = rules enforced through prompt content. No kernel-level blocking, no hooks, no slash commands, no statusline — but the rule file is read by the AI and followed.
+
+### Tier 3 — Full support TBD
+
+Full plugin-like parity (hooks, slash commands, statusline, dep-plugin stack) for Codex / Cursor / Copilot is on the roadmap.
+
+> **TBD — roadmap, no ETA.** Track progress in [Roadmap](#roadmap) or open an issue to upvote.
+
+---
+
+## Comparison
+
+| | AIPS v6.0 | AIPS v5.x (.md) | `.cursorrules` only | Hand-written CLAUDE.md |
 |---|:---:|:---:|:---:|:---:|
-| Single source of truth across tools | ✅ | ❌ Cursor only | ❌ Claude only | ❌ |
-| Zero install | ✅ | ✅ | ✅ | ❌ |
-| Safety hooks (kernel-level) | ✅ | ❌ | manual | maybe |
-| Session resume on crash | ✅ | ❌ | manual | maybe |
-| Token discipline enforcement | ✅ | ❌ | manual | ❌ |
-| Self-update from upstream | ✅ | ❌ | ❌ | ✅ |
-| Bilingual GitHub files | ✅ | ❌ | ❌ | ❌ |
-| AI-tooling leak prevention | ✅ | ❌ | manual | ❌ |
-| Cross-AI relay (Claude ↔ Codex) | ✅ | ❌ | ❌ | ❌ |
-| Works on Linux / macOS / Windows | ✅ | ✅ | ✅ | depends |
+| Per-project setup time | ~30 sec | 1–3 min | instant | hours |
+| Deterministic | yes (shell) | no (AI interprets) | yes | yes |
+| Single source of truth across tools | yes | yes | no (Cursor only) | no (Claude only) |
+| One-line global install | yes | no | no | no |
+| Safety hooks (kernel-level) | yes | yes | no | manual |
+| Session resume on crash | yes | yes | no | manual |
+| 3-line statusline (incl. savings) | yes | no | no | no |
+| Cross-AI relay (Claude ↔ Codex) | yes (plugin) | yes (custom) | no | no |
+| Token savings (RTK + caveman + agentmemory) | yes | no | no | no |
+| Upstream self-update | yes (`/aips:update`) | yes (AI fetch) | no | no |
+| AI-tooling leak prevention | yes | yes | no | manual |
+| Linux / macOS / Windows | yes | yes | yes | yes |
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 | Document | What's inside |
-|----------|---------------|
-| [AI_PROJECT_SETUP.md](AI_PROJECT_SETUP.md) | The artifact — 7,600-line bootstrap that creates everything |
+|---|---|
+| [install.sh](install.sh) | Global install script |
 | [docs/README.ko.md](docs/README.ko.md) | This README in Korean |
-| [CONTRIBUTING.md](CONTRIBUTING.md) · [한국어](docs/CONTRIBUTING.ko.md) | Development setup, version-bump checklist, PR conventions |
-| [SECURITY.md](SECURITY.md) · [한국어](docs/SECURITY.ko.md) | Security disclosure process, secret-guard patterns |
+| [AI_PROJECT_SETUP.md](AI_PROJECT_SETUP.md) | v5.2 archive (becomes 30-line DEPRECATED stub in v6.0) |
+| [CONTRIBUTING.md](CONTRIBUTING.md) · [한국어](docs/CONTRIBUTING.ko.md) | Dev setup, version-bump checklist, PR conventions |
+| [SECURITY.md](SECURITY.md) · [한국어](docs/SECURITY.ko.md) | Disclosure process, secret-guard patterns |
 | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [한국어](docs/CODE_OF_CONDUCT.ko.md) | Contributor Covenant v2.1 |
 | [CHANGELOG.md](CHANGELOG.md) · [한국어](docs/CHANGELOG.ko.md) | Full version history |
 
 ---
 
-## 🔁 Self-update
-
-Trigger via natural language: `"AI_PROJECT_SETUP 업데이트해"` / `"update AI_PROJECT_SETUP"` / `"fetch latest setup"`.
-
-The AI:
-
-1. Fetches `https://raw.githubusercontent.com/kernalix7/AIPS/main/AI_PROJECT_SETUP.md`
-2. Compares `Last Updated` line and version against local copy
-3. If newer: replaces `.priv-storage/AI_PROJECT_SETUP.md`, force-overwrites all 30+ shipped scripts with `.bak` backup
-4. Merges template sections of `CLAUDE.md` (§8/9/10/12/13) while preserving project content (§1–7, §11)
-5. Re-runs the validator gate
-6. Reports `Updated: vOLD → vNEW. Force-patched N shipped scripts. Recommend /clear.`
-
-**Single command, no re-run prompt** (since v4.6+).
-
-> **v5.0 → v5.1 migration**: v5.1 moved the update source from a gist to this repository. Projects on v5.0 or earlier fetch v5.1 once from the legacy gist (frozen at v5.1 as a migration bridge), then all subsequent updates come from this repository.
-
----
-
-## 🍴 Forking
-
-To point forks at your own repo for self-update:
-
-1. Edit [`AI_PROJECT_SETUP.md`](AI_PROJECT_SETUP.md) — replace both occurrences of `kernalix7/AIPS` with `{your-user}/{your-repo}`:
-   - The repo URL in the **Source of Truth** block
-   - The raw URL in the same block and in the self-update protocol Step 2
-2. Optionally remove the legacy gist URL block (only needed when migrating users from pre-v5.1).
-3. Commit and push to your fork's `main` branch.
-
-For downstream project customization, edit the generated `.priv-storage/CLAUDE.md` directly — sections 1–7 and 11 are preserved across self-updates.
-
----
-
-## ❓ FAQ
+## FAQ
 
 <details>
-<summary><b>Why a single 7,000-line markdown file instead of a CLI tool?</b></summary>
+<summary><b>Do I have to move from v5.x to v6.0?</b></summary>
 
-AI coding assistants natively read markdown. A CLI tool needs installation, version management, and platform support. A markdown file works everywhere any AI works — Linux, macOS, Windows, containers, browser-based agents — with zero install.
+No. v5.2 stays supported as the stable line. Keep using v5.x until v6.0 is promoted to stable. When you're ready, a single `/aips:init` auto-migrates (case B).
 </details>
 
 <details>
-<summary><b>Doesn't 7,000 lines blow up my context window?</b></summary>
+<summary><b>What does install.sh touch on my system?</b></summary>
 
-Only on initial setup (~25k tokens, one time). After setup, the file is archived and a 50-line `POST_SETUP_INDEX.md` becomes the entry point. Normal sessions consume ~200 lines of `CLAUDE.md` + the index — about 4k tokens.
+`~/.claude/` (Claude Code global config), `~/.local/bin/rtk` (RTK binary), and a user-level systemd unit (agentmemory). It does not touch system-wide directories (`/usr/local/`, `/etc/`). Uninstall via `/aips:uninstall` for a safe rollback.
 </details>
 
 <details>
-<summary><b>Is it safe that nothing gets committed? My CI/CD doesn't see hooks/agents.</b></summary>
+<summary><b>Why bundle 4 dependency plugins?</b></summary>
 
-Correct, and intentional. AI tooling is per-developer ergonomics; CI/CD runs against your code, not your AI config. Teammates who don't use AI see no change. Those who do run setup themselves and get the same config from this same source.
+Each provides an orthogonal value — codex-plugin-cc (relay), caveman (output compression), agentmemory (persistent memory), RTK (CLI token savings). Installing them separately makes hook conflicts and statusline fallbacks painful. Bundling guarantees cross-plugin sync.
 </details>
 
 <details>
-<summary><b>Will this work with [some new AI tool that doesn't exist yet]?</b></summary>
+<summary><b>Does it work offline?</b></summary>
 
-If the tool reads markdown rules files (`CLAUDE.md` / `AGENTS.md` / `.cursorrules` / similar), yes — point it at any of the three symlinks. If it supports MCP, it'll find `.mcp.json` automatically. Hooks are Claude Code-specific.
+Install / update need the network (marketplace pull, RTK binary fetch). Normal sessions and `/aips:init` work offline — every artifact is read from the local plugin store.
 </details>
 
 <details>
-<summary><b>How do I uninstall?</b></summary>
+<summary><b>How do I sync across multiple machines?</b></summary>
 
-```bash
-./tmp-igbkp/uninstall.sh
-```
-Backs up everything to `tmp-igbkp/uninstall-backup-{ts}/` before removing. Add `--clean-gitignore` to also remove the AI-tooling block from `.gitignore`.
+agentmemory dual-writes project memory into `~/.claude/projects/{path-encoded}/memory/`. On a new machine: run `install.sh` → `/aips:init` in the project → `rsync` the memory dir over and you're restored.
 </details>
 
 <details>
 <summary><b>What about Windows?</b></summary>
 
-Works on Git Bash, WSL, and MSYS2. Native PowerShell is not supported for hooks (they're bash scripts), but the rules file itself is plain markdown and works with any AI tool on Windows.
+Git Bash, WSL, and MSYS2 work. `install.sh` is bash, hooks are bash, so native PowerShell is not supported. WSL is recommended.
 </details>
 
 <details>
-<summary><b>Can I use this with multiple AI tools simultaneously in the same project?</b></summary>
+<summary><b>Can I use multiple AI tools in the same project?</b></summary>
 
-Yes — that's the design. Claude Code reads `CLAUDE.md`, Codex/Copilot read `AGENTS.md`, Cursor reads `.cursorrules`. All three are symlinks to the same `.priv-storage/CLAUDE.md` so updates are atomic.
+Yes. Claude Code reads `CLAUDE.md`, Codex / Copilot read `AGENTS.md`, Cursor reads `.cursorrules` — all three are symlinks to the same `.priv-storage/CLAUDE.md`, so updates are atomic. Hooks, statusline, and slash commands are Claude Code-only.
+</details>
+
+<details>
+<summary><b>Can I skip the marketplace and just clone the repo?</b></summary>
+
+Yes. Clone the repo and run `install.sh` from the local path — the marketplace-registration step falls back to pointing at the local path. Useful for forked environments.
 </details>
 
 <details>
@@ -438,17 +417,18 @@ Open an issue or PR at <https://github.com/kernalix7/AIPS>. See [CONTRIBUTING.md
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
-- **v5.3** — `.devcontainer/` template, GitHub Actions workflow for setup verification
-- **v5.4** — Native Windows PowerShell hooks (experimental)
-- **v6.0** — Pluggable rule modules (`.priv-storage/.claude/rules/<lang>/`)
+- **v6.0** *(in development)* — Plugin marketplace + 4 dependency plugins + 9 `/aips:*` commands
+- **v6.1** — `.devcontainer/` templates, GitHub Actions workflow for config validation
+- **v6.2** — Native Windows PowerShell hook layer (experimental)
+- **v7.0** — Per-language pluggable rule modules (`~/.claude/plugins/aips-rules-<lang>/`)
 
-See [CHANGELOG.md](CHANGELOG.md) for version history.
+See [CHANGELOG.md](CHANGELOG.md) for shipped versions.
 
 ---
 
-## ⭐ Star history
+## Star history
 
 <a href="https://star-history.com/#kernalix7/AIPS&Date">
   <picture>
@@ -460,18 +440,18 @@ See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ---
 
-## 💛 Support
+## Support
 
 If AIPS saved you setup time:
 
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-F16061?logo=ko-fi&logoColor=white&style=for-the-badge)](https://ko-fi.com/kernalix7)
-[![Fairy](https://img.shields.io/badge/🧚_Fairy-EE6E73?style=for-the-badge&logoColor=white)](https://fairy.hada.io/@kernalix7)
+[![Fairy](https://img.shields.io/badge/Fairy-EE6E73?style=for-the-badge&logoColor=white)](https://fairy.hada.io/@kernalix7)
 
-Ko-fi handles international cards and PayPal; fairy.hada.io is a Korean tipping platform. Bug reports, PRs, and ⭐ stars on the repo are equally appreciated and free.
+Ko-fi handles international cards and PayPal; fairy.hada.io is a Korean tipping platform. Bug reports, PRs, and stars on the repo are equally appreciated and free.
 
 ---
 
-## 📄 License
+## License
 
 [MIT](LICENSE) — Kim DaeHyun ([kernalix7@kodenet.io](mailto:kernalix7@kodenet.io))
 

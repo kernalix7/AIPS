@@ -2,42 +2,51 @@
 
 **English** | [한국어](docs/CONTRIBUTING.ko.md)
 
-Thanks for your interest in contributing!
+Thanks for contributing to AIPS (Claude Code plugin, v6.0+).
 
-## Development Setup
+## Setup
 
 ```bash
 git clone https://github.com/kernalix7/AIPS.git
 cd AIPS
 ```
 
-No build step — `AI_PROJECT_SETUP.md` is the artifact.
+No build step. Plugin ships as source: `commands/`, `hooks/`, `agents/`, `skills/`, `lib/`, `templates/`, `statusline`.
 
 ## Workflow
 
-1. Fork the repo and create a feature branch: `git checkout -b feature/my-change`
-2. Make your changes to `AI_PROJECT_SETUP.md` and/or `README.md`
-3. Bump version: update title `**v5.X**`, `**Last Updated**:` date, and add a row to the Version History table
-4. Run verification:
-   ```bash
-   wc -l AI_PROJECT_SETUP.md
-   grep -c "^## Version History" AI_PROJECT_SETUP.md
-   ```
-5. Commit using conventional prefixes: `feat:`, `fix:`, `refactor:`, `docs:`, `chore:`
-6. Open a Pull Request
+1. Branch: `git checkout -b feature/my-change`
+2. Edit the relevant area:
+   - Slash commands → `commands/aips-*.md`
+   - Lifecycle hooks → `hooks/`
+   - Subagent templates → `agents/`
+   - Per-project init payload → `templates/`
+   - Helpers → `lib/` (`detect-project.sh`, `render-claude-md.sh`, `verify-init.sh`, `migrate-from-md.sh`, `setup-agentmemory-service.sh`)
+   - Statusline / output style → `statusline`, `output-styles/terse.md`
+3. Install from your working tree: `bash install.sh --local-source "$(pwd)"`
+4. Dogfood: `mkdir -p /tmp/test-project && cd /tmp/test-project && git init && claude`, then `/aips:init`.
+5. Verify: `bash lib/verify-init.sh /tmp/test-project`
+6. Commit with a conventional prefix (below).
+7. Open a PR against `main`. Single maintainer for now (direct push on trivial fixes); PRs welcome when external contributors arrive. No CI yet — verify locally.
+
+## Version Bump Checklist (v6.0+)
+
+- `.claude-plugin/plugin.json` → bump `version`
+- `README.md` → update status badge
+- `CHANGELOG.md` → add entry
+- Tag: `git tag v6.x.y`
 
 ## Commit Convention
 
-- `feat:` new feature
-- `fix:` bug fix
-- `refactor:` code restructure without behavior change
-- `docs:` documentation only
-- `chore:` tooling, build, dependencies
+`feat:` / `fix:` / `refactor:` / `docs:` / `chore:`
 
-## Code of Conduct
+Example: `feat(commands): add /aips:repair for broken installs`
 
-See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+## Doc Sync
 
-## License
+EN/KO docs stay in lockstep. Touching `README.md`, `CONTRIBUTING.md`, `docs/ARCHITECTURE.md`, or `docs/MIGRATION-FROM-MD.md` requires updating the matching file under `docs/ko/` (or `docs/CONTRIBUTING.ko.md`) in the same PR.
 
-By contributing, you agree your contributions are licensed under the [MIT License](LICENSE).
+## Misc
+
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- License: contributions are [MIT](LICENSE).

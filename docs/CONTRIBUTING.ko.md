@@ -2,30 +2,51 @@
 
 [English](../CONTRIBUTING.md) | **한국어**
 
-기여에 관심 가져주셔서 감사합니다!
+AIPS (Claude Code 플러그인, v6.0+) 기여에 감사드립니다.
 
-## 개발 환경 설정
+## 환경 설정
 
 ```bash
 git clone https://github.com/kernalix7/AIPS.git
 cd AIPS
 ```
 
-빌드 단계 없음 — `AI_PROJECT_SETUP.md` 자체가 산출물입니다.
+빌드 단계 없음. 플러그인은 소스 그대로 배포: `commands/`, `hooks/`, `agents/`, `skills/`, `lib/`, `templates/`, `statusline`.
 
 ## 워크플로
 
-1. 저장소 포크 후 기능 브랜치 생성: `git checkout -b feature/my-change`
-2. `AI_PROJECT_SETUP.md` 및/또는 `README.md` 수정
-3. 버전 업: 제목 `**v5.X**`, `**Last Updated**:` 날짜, Version History 표 행 추가
-4. 검증 실행
-5. 커밋 컨벤션 사용: `feat:`, `fix:`, `refactor:`, `docs:`, `chore:`
-6. Pull Request 열기
+1. 브랜치: `git checkout -b feature/my-change`
+2. 해당 영역 수정:
+   - 슬래시 커맨드 → `commands/aips-*.md`
+   - 라이프사이클 훅 → `hooks/`
+   - 서브에이전트 템플릿 → `agents/`
+   - 프로젝트 초기화 페이로드 → `templates/`
+   - 헬퍼 → `lib/` (`detect-project.sh`, `render-claude-md.sh`, `verify-init.sh`, `migrate-from-md.sh`, `setup-agentmemory-service.sh`)
+   - 스테이터스라인 / 출력 스타일 → `statusline`, `output-styles/terse.md`
+3. 작업 트리에서 설치: `bash install.sh --local-source "$(pwd)"`
+4. 도그푸딩: `mkdir -p /tmp/test-project && cd /tmp/test-project && git init && claude`, 이후 `/aips:init`.
+5. 검증: `bash lib/verify-init.sh /tmp/test-project`
+6. 컨벤션 prefix로 커밋 (아래 참조).
+7. `main`으로 PR. 현재 단일 메인테이너 (사소한 수정은 직접 push); 외부 기여자 합류 시 PR 워크플로 전환. CI 없음 — 로컬 검증 필수.
 
-## 행동 강령
+## 버전 업 체크리스트 (v6.0+)
 
-[CODE_OF_CONDUCT.ko.md](CODE_OF_CONDUCT.ko.md)를 참조하세요.
+- `.claude-plugin/plugin.json` → `version` 갱신
+- `README.md` → 상태 배지 갱신
+- `CHANGELOG.md` → 항목 추가
+- 태그: `git tag v6.x.y`
 
-## 라이선스
+## 커밋 컨벤션
 
-기여하신 내용은 [MIT License](../LICENSE)에 따라 라이선스됩니다.
+`feat:` / `fix:` / `refactor:` / `docs:` / `chore:`
+
+예시: `feat(commands): add /aips:repair for broken installs`
+
+## 문서 동기화
+
+영문/한국어 문서는 항상 함께 업데이트. `README.md`, `CONTRIBUTING.md`, `docs/ARCHITECTURE.md`, `docs/MIGRATION-FROM-MD.md` 수정 시 같은 PR에서 `docs/ko/` (또는 `docs/CONTRIBUTING.ko.md`) 대응 파일도 갱신.
+
+## 기타
+
+- [행동 강령](CODE_OF_CONDUCT.ko.md)
+- 라이선스: 기여는 [MIT](../LICENSE).
