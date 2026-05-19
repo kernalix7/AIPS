@@ -6,13 +6,18 @@
 
 <p><b>AIPS v7.0</b> is a Claude Code plugin with a <b>hybrid global-first</b> architecture. One install scatters smart globals across <code>~/.claude/</code>. Each <code>/aips:init</code> plants just enough per-project to keep your team in sync — agent rules, work state, MCP config, encrypted backups. Hooks survive crashes. Memory survives <code>/clear</code>. Sessions survive a project rename.</p>
 
-<pre><code># Once per machine
+<pre><code># Once per machine — install
 curl -fsSL https://raw.githubusercontent.com/kernalix7/AIPS/main/install.sh | bash
 
 # Once per project
 cd my-project && claude
 > /aips:init
+
+# Uninstall (interactive, safe by default — see flags below)
+curl -fsSL https://raw.githubusercontent.com/kernalix7/AIPS/main/uninstall.sh | bash
 </code></pre>
+
+<sub>Uninstall flags: <code>--purge</code> (configs + deps + RTK) · <code>--remove-data</code> (sessions + memory + agentmemory db) · <code>--all</code> (everything) · <code>--dry-run</code> · <code>--yes</code>. Default is safest — only the AIPS plugin and <code>aips-*</code> symlinks are removed; every other category asks per-path before deletion.</sub>
 
 [![Status](https://img.shields.io/badge/v7.0.0-stable-2EA44F?style=for-the-badge)](CHANGELOG.md)
 [![Released](https://img.shields.io/badge/released-2026--05--19-2962FF?style=for-the-badge)](CHANGELOG.md)

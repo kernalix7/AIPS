@@ -6,13 +6,18 @@
 
 <p><b>AIPS v7.0</b>은 <b>hybrid global-first</b> 아키텍처의 Claude Code plugin입니다. install 한 번으로 <code>~/.claude/</code>에 똑똑한 global들이 깔리고, 각 프로젝트에서 <code>/aips:init</code>이 팀 공유에 꼭 필요한 만큼만 — agent rule, work state, MCP config, 암호화 백업 — per-project로 심어줍니다. Hook은 크래시를 살아남고, memory는 <code>/clear</code>를 살아남고, sessions는 프로젝트 이름 변경까지 살아남습니다.</p>
 
-<pre><code># 머신당 1회
+<pre><code># 머신당 1회 — 설치
 curl -fsSL https://raw.githubusercontent.com/kernalix7/AIPS/main/install.sh | bash
 
 # 프로젝트당 1회
 cd my-project && claude
 &gt; /aips:init
+
+# 삭제 (interactive, 기본은 안전 — 플래그는 아래 참조)
+curl -fsSL https://raw.githubusercontent.com/kernalix7/AIPS/main/uninstall.sh | bash
 </code></pre>
+
+<sub>삭제 플래그: <code>--purge</code> (설정 + dep plugin + RTK) · <code>--remove-data</code> (sessions + memory + agentmemory db) · <code>--all</code> (전부) · <code>--dry-run</code> · <code>--yes</code>. 기본은 가장 안전 — AIPS plugin과 <code>aips-*</code> symlink만 제거하고, 나머지 카테고리는 카테고리별로 경로 보여주며 확인 받음.</sub>
 
 [![Status](https://img.shields.io/badge/v7.0.0-stable-2EA44F?style=for-the-badge)](../CHANGELOG.md)
 [![Released](https://img.shields.io/badge/released-2026--05--19-2962FF?style=for-the-badge)](../CHANGELOG.md)
