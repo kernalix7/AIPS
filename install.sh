@@ -311,6 +311,13 @@ if want rtk; then
   fi
 fi
 
+# Resolve a lib script across versioned cache subdirs.
+# Plugin installs to ~/.claude/plugins/cache/AIPS/AIPS/<version>/lib/<name>.sh
+aips_lib_script() {
+  local name="$1"
+  find "$HOME/.claude/plugins/cache/AIPS/AIPS" -maxdepth 3 -type f -name "$name" 2>/dev/null | sort -V | tail -1
+}
+
 # ---------- agentmemory service (Linux only) ----------
 if want agentmemory && [ "$UNAME" = "Linux" ] && command -v systemctl >/dev/null 2>&1; then
   next_step "agentmemory systemd user service"
@@ -318,11 +325,12 @@ if want agentmemory && [ "$UNAME" = "Linux" ] && command -v systemctl >/dev/null
   detail "Ports: 3111 (REST API), 3113 (web viewer)"
   detail "Restart policy: on-failure, 5-sec delay"
   detail "First-install: bilingual setup banner printed once"
-  SVC_SCRIPT="$HOME/.claude/plugins/cache/AIPS/AIPS/lib/setup-agentmemory-service.sh"
-  if [ -x "$SVC_SCRIPT" ] || [ -f "$SVC_SCRIPT" ]; then
+  SVC_SCRIPT="$(aips_lib_script setup-agentmemory-service.sh)"
+  if [ -n "$SVC_SCRIPT" ] && [ -f "$SVC_SCRIPT" ]; then
+    detail "script: $SVC_SCRIPT"
     run "bash \"$SVC_SCRIPT\"" || warn "agentmemory service setup returned non-zero (continuing)"
   else
-    warn "agentmemory service script not found at $SVC_SCRIPT — skip (will retry on next /aips:init)"
+    warn "setup-agentmemory-service.sh not found under ~/.claude/plugins/cache/AIPS/AIPS/*/lib/ — skip"
   fi
 fi
 
@@ -335,11 +343,20 @@ detail "aips-automode-validate, aips-setup-worktree"
 detail "Per-project tmp-igbkp/ no longer needs script copies"
 DRY_RUN_FLAG=""
 [ "$DRY_RUN" = "1" ] && DRY_RUN_FLAG="--dry-run"
-GLOBALIZE_SCRIPT="${HOME}/.claude/plugins/cache/AIPS/AIPS/lib/globalize-toolkit.sh"
-if [ -f "$GLOBALIZE_SCRIPT" ]; then
+GLOBALIZE_SCRIPT="$(aips_lib_script globalize-toolkit.sh)"
+if [ -n "$GLOBALIZE_SCRIPT" ] && [ -f "$GLOBALIZE_SCRIPT" ]; then
+  detail "script: $GLOBALIZE_SCRIPT"
   bash "$GLOBALIZE_SCRIPT" $DRY_RUN_FLAG || warn "toolkit globalization failed (non-fatal)"
 else
-  warn "globalize-toolkit.sh not found at $GLOBALIZE_SCRIPT — skip (will retry on next /aips:init)"
+  warn "globalize-toolkit.sh not found under ~/.claude/plugins/cache/AIPS/AIPS/*/lib/ — skip"
+fi
+
+# ---------- Globalize AIPS gitignore block ----------
+GLOBAL_GITIGNORE_SCRIPT="$(aips_lib_script setup-global-gitignore.sh)"
+if [ -n "$GLOBAL_GITIGNORE_SCRIPT" ] && [ -f "$GLOBAL_GITIGNORE_SCRIPT" ]; then
+  log "Installing AIPS .gitignore block at ~/.config/git/ignore..."
+  detail "script: $GLOBAL_GITIGNORE_SCRIPT"
+  bash "$GLOBAL_GITIGNORE_SCRIPT" $DRY_RUN_FLAG || warn "gitignore globalization failed (non-fatal)"
 fi
 
 # ---------- Final summary ----------

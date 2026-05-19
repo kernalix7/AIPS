@@ -16,8 +16,11 @@ CLAUDE.local.md
 # MCP server registry
 .mcp.json
 
-# Backup toolkit
+# Backup toolkit (repo root — dogfood backup output)
 tmp-igbkp/
+# Exception: templates/tmp-igbkp/ ships toolkit source-of-truth to users
+!templates/tmp-igbkp/
+!templates/tmp-igbkp/**
 
 # Read-once protection toggle
 .priv-storage/.allow-setup-reread
