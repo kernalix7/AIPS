@@ -7,7 +7,7 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v7.0 — Unreleased] — 2026-05-19
+## [v7.0.0] — 2026-05-19
 
 **Hybrid Global-First architecture.** Non-breaking — v6.0 setups continue
 working; v7.0 migration is opt-in via `/aips:upgrade --to v7.0`.
@@ -84,7 +84,7 @@ working; v7.0 migration is opt-in via `/aips:upgrade --to v7.0`.
 - Cuts per-project disk footprint roughly 4x for installed-tool state.
 - Multi-tool parity (Codex/Cursor/Copilot) preserved unchanged.
 
-## [v6.0 — Unreleased] — 2026-05-19
+## [v6.0.0] — 2026-05-19 (folded into v7.0.0 release)
 
 **BREAKING: AIPS becomes a Claude Code plugin.**
 

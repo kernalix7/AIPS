@@ -41,13 +41,13 @@ cd my-project && claude
 
 ---
 
-### 상태: v7.0 개발 중
+### 상태: v7.0.0 stable
 
 > **v5.2 안정**은 단일 파일 부트스트랩(`AI_PROJECT_SETUP.md`, ~7,600줄) 모델입니다. 다운로드받고 AI에게 "읽고 실행해줘"라고 시키는 방식. v5.x 사용자는 [`AI_PROJECT_SETUP.md`](../AI_PROJECT_SETUP.md)를 계속 쓰면 됩니다.
 >
 > **v6.0**은 동일 산출물을 **Claude Code 플러그인 marketplace**로 재배포합니다. 머신당 한 번 `install.sh`를 실행하면 `~/.claude/`에 marketplace를 등록하고 의존 plugin 4개를 install/update하며, 각 프로젝트에서는 `/aips:init` 한 번으로 신규/v5.x 마이그레이션/재init/복구를 **자동 분기**합니다. 7,600줄 마크다운을 매번 AI가 읽고 해석하던 모델을 버리고, 결정론적 install script + idempotent slash 명령으로 대체합니다. v6.0 셋업은 그대로 유효한 baseline입니다.
 >
-> **v7.0(개발 중)**은 v6.0 위에 **hybrid global-first** 모델을 얹습니다 — toolkit script, sessions mirror, memory, AIPS gitignore block을 `~/.claude/` / `~/.local/bin/` / `~/.config/git/ignore`로 globalize하고, CLAUDE.md / WORK_STATUS.md / `.mcp.json` / agent 파일 / `tmp-igbkp/` 백업 산출물은 그대로 프로젝트별로 둡니다. v7.0은 **non-breaking**입니다: 기존 v6.0 프로젝트는 손대지 않고 그대로 동작하며, 마이그레이션은 `/aips:upgrade --to v7.0`으로 opt-in.
+> **v7.0.0 (stable)**는 v6.0 위에 **hybrid global-first** 모델을 얹습니다 — toolkit script, sessions mirror, memory, AIPS gitignore block을 `~/.claude/` / `~/.local/bin/` / `~/.config/git/ignore`로 globalize하고, CLAUDE.md / WORK_STATUS.md / `.mcp.json` / agent 파일 / `tmp-igbkp/` 백업 산출물은 그대로 프로젝트별로 둡니다. v7.0은 **non-breaking**입니다: 기존 v6.0 프로젝트는 손대지 않고 그대로 동작하며, 마이그레이션은 `/aips:upgrade --to v7.0` (strict-by-default).
 >
 > 이 문서는 **v7.0**을 설명하며 v6.0 baseline도 함께 다룹니다. v5.2가 필요하다면 [영문 README v5.2 섹션](../README.md) 또는 [`AI_PROJECT_SETUP.md`](../AI_PROJECT_SETUP.md)을 참고하세요.
 
@@ -495,7 +495,7 @@ Git Bash, WSL, MSYS2에서 동작합니다. install.sh는 bash이고, hook도 ba
 ## 로드맵
 
 - **v6.0** — plugin marketplace + 의존 plugin 4개 + `/aips:*` 9개 명령 (baseline; 그대로 유효)
-- **v7.0** *(개발 중)* — Hybrid global-first: toolkit/sessions/memory/gitignore globalize, 새 `/aips:*` 명령 3개 (`upgrade --to v7.0`, `rebind`, `scope`), v6.0 → v7.0은 opt-in non-breaking 마이그레이션
+- **v7.0.0** *(stable, 2026-05-19)* — Hybrid global-first: toolkit/sessions/memory/gitignore globalize, 새 `/aips:*` 명령 3개 (`upgrade --to v7.0`, `rebind`, `scope`), strict-by-default non-breaking 마이그레이션
 - **v7.1** — agentmemory 심화 통합 (cross-project workflow 추천, 공유 lesson surface)
 - **v7.2** — `/aips:rebind` UX 개선 (path-hash heuristic으로 이동된 프로젝트 auto-detect)
 - **v8.0 (candidate)** — TBD; 후보: cloud sync 기반 team-shared global, 또는 third-party AIPS 확장용 full plugin marketplace 퍼블리싱

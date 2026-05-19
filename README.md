@@ -41,13 +41,13 @@ cd my-project && claude
 
 ---
 
-### Status: v7.0 in development
+### Status: v7.0.0 stable
 
 > **v5.2 (stable)** is the single-file bootstrap model (`AI_PROJECT_SETUP.md`, ~7,600 lines). You download it and tell the AI "read and execute this." v5.x users can keep using [`AI_PROJECT_SETUP.md`](AI_PROJECT_SETUP.md).
 >
 > **v6.0** redistributes the same artifact as a **Claude Code plugin marketplace**. One `install.sh` per machine registers the marketplace in `~/.claude/` and installs/updates 4 dependency plugins; each project runs `/aips:init` once and **auto-branches** between fresh / v5.x migrate / re-init / repair. The 7,600-line markdown the AI used to parse every time is replaced by a deterministic install script + idempotent slash commands. v6.0 setups remain a fully valid baseline.
 >
-> **v7.0 (in development)** layers a **hybrid global-first** model on top of v6.0 — toolkit scripts, sessions mirror, memory, and the AIPS gitignore block move into `~/.claude/` / `~/.local/bin/` / `~/.config/git/ignore`, while CLAUDE.md, WORK_STATUS.md, `.mcp.json`, agent files, and `tmp-igbkp/` backup outputs stay per-project. v7.0 is **non-breaking**: existing v6.0 projects keep working untouched, and migration is opt-in via `/aips:upgrade --to v7.0`.
+> **v7.0.0 (stable)** layers a **hybrid global-first** model on top of v6.0 — toolkit scripts, sessions mirror, memory, and the AIPS gitignore block move into `~/.claude/` / `~/.local/bin/` / `~/.config/git/ignore`, while CLAUDE.md, WORK_STATUS.md, `.mcp.json`, agent files, and `tmp-igbkp/` backup outputs stay per-project. v7.0 is **non-breaking**: existing v6.0 projects keep working untouched, and migration is opt-in via `/aips:upgrade --to v7.0` (strict-by-default).
 >
 > This document describes **v7.0** with v6.0 baseline notes. If you need v5.2, see the [v5.2 archive](AI_PROJECT_SETUP.md) or the [Korean README](docs/README.ko.md) v5.2 section.
 
@@ -497,7 +497,7 @@ Open an issue or PR at <https://github.com/kernalix7/AIPS>. See [CONTRIBUTING.md
 ## Roadmap
 
 - **v6.0** — Plugin marketplace + 4 dependency plugins + 9 `/aips:*` commands (baseline; remains valid)
-- **v7.0** *(in development)* — Hybrid global-first: globalized toolkit/sessions/memory/gitignore, 3 new `/aips:*` commands (`upgrade --to v7.0`, `rebind`, `scope`), opt-in non-breaking migration from v6.0
+- **v7.0.0** *(stable, 2026-05-19)* — Hybrid global-first: globalized toolkit/sessions/memory/gitignore, 3 new `/aips:*` commands (`upgrade --to v7.0`, `rebind`, `scope`), strict-by-default non-breaking migration from v6.0
 - **v7.1** — agentmemory deeper integration (cross-project workflow recommendations, shared lesson surfaces)
 - **v7.2** — `/aips:rebind` UX improvements (auto-detect moved projects via path-hash heuristics)
 - **v8.0 (candidate)** — TBD; options under consideration: team-shared globals via cloud sync, or full plugin-marketplace publishing for third-party AIPS extensions
