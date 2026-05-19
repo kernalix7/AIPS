@@ -171,6 +171,28 @@ for d in "${REMOVE_DIRS[@]}"; do
 done
 ok "removed $N_REMOVED v5.x artifacts"
 
+# ---------- strip stale hook refs from settings.json ----------
+# After deleting .priv-storage/.claude/hooks/, the v5.x settings.json may still
+# point at .claude/hooks/<name>.sh paths, causing "No such file or directory"
+# spam on every Claude Code tool call. Strip the hooks block (and leftover
+# statusLine ref) so the global plugin can take over cleanly.
+SETTINGS_JSON="$ROOT/.priv-storage/.claude/settings.json"
+if [ -f "$SETTINGS_JSON" ]; then
+  if [ "$DRY_RUN" = "0" ]; then
+    cp "$SETTINGS_JSON" "$SETTINGS_JSON.v5.bak"
+    if command -v jq >/dev/null 2>&1; then
+      # Drop hooks and statusLine — global plugin provides both.
+      jq 'del(.hooks) | del(.statusLine)' "$SETTINGS_JSON" > "$SETTINGS_JSON.tmp" \
+        && mv "$SETTINGS_JSON.tmp" "$SETTINGS_JSON" \
+        && ok "stripped .hooks + .statusLine from $SETTINGS_JSON (backup: ${SETTINGS_JSON##*/}.v5.bak)"
+    else
+      warn "jq missing — leaving $SETTINGS_JSON intact; you may see hook-not-found spam until you remove the .hooks key manually"
+    fi
+  else
+    printf "  [dry-run] jq del(.hooks) del(.statusLine) %s\n" "$SETTINGS_JSON"
+  fi
+fi
+
 # ---------- EDIT CLAUDE.md ----------
 CFILE="$ROOT/.priv-storage/CLAUDE.md"
 if [ -f "$CFILE" ]; then

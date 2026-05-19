@@ -26,8 +26,8 @@ Same logic as `/aips:init` CASE B, but always runs migration — does not consul
    - **REMOVE**: `.priv-storage/AI_PROJECT_SETUP.md`; `.priv-storage/.claude/{hooks,skills,output-styles,statusline}/*`; `.priv-storage/.claude/agents/{explorer,code-reviewer,log-analyzer}.md`; `.priv-storage/.claude/commands/{status,recover,ship,health,save,clean,codex-brief,codex-review,codex-fix,codex-relay-status}.md`; `tmp-igbkp/codex-relay-{check,run}.sh`; `.priv-storage/sessions/{codex-brief,codex-report,claude-review}.md` and `.priv-storage/sessions/codex-relay/`.
    - **EDIT**: `.priv-storage/CLAUDE.md` slimmed to Section 1-7 + 11 only.
    - **PRESERVE**: `WORK_STATUS.md`, `memory/`, `sessions/{current,recovery,handoff-*}.md`, `.mcp.json`, `.gitignore`, `tmp-igbkp/{archive,restore,purge-history,verify-setup,uninstall,smoke-test-hooks,secret-guard,automode-validate,setup-worktree}.sh`, `.priv-storage/.claude/agents/tech-lead.md`, `.priv-storage/.claude/agents/*-team.md`.
-3. **Confirm** — prompt `Proceed with migration? [Y/n]` (default Y).
-4. **Run** — `lib/migrate-from-md.sh "$TARGET"`.
+3. **Single confirm** — prompt **once**: `Run all of the above without further prompts? [Y/n]` (default Y).
+4. **Run** — `lib/migrate-from-md.sh "$TARGET" --auto-confirm` (the `--auto-confirm` flag suppresses the script's internal prompt so the whole migration runs end-to-end without re-asking).
 5. **Verify** — `lib/verify-init.sh "$TARGET"` and report PASS/FAIL.
 
 ## Output

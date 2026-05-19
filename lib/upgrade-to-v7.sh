@@ -161,7 +161,11 @@ log "backup     $BACKUP_DIR ($BACKUP_COUNT items)"
 # ---------------------------------------------------------------------------
 GLOBALIZED=0
 if [ -x "$LIB_DIR/globalize-toolkit.sh" ] || [ -f "$LIB_DIR/globalize-toolkit.sh" ]; then
-  run "bash '$LIB_DIR/globalize-toolkit.sh' '$PROJECT_ROOT'"
+  # globalize-toolkit.sh takes flags only (no project_root arg) — operates
+  # on the plugin's own templates/tmp-igbkp/ → ~/.local/bin/aips-* symlinks
+  GTK_FLAGS=""
+  [ "$DRY_RUN" = "1" ] && GTK_FLAGS="--dry-run"
+  run "bash '$LIB_DIR/globalize-toolkit.sh' $GTK_FLAGS"
   GLOBALIZED=1
   log "globalized toolkit (via globalize-toolkit.sh)"
 else

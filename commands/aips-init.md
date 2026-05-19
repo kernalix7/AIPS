@@ -33,12 +33,14 @@ Output: `init: fresh — <lang>/<framework> — <N> files written — verify: PA
 
 ## CASE B — v5.x migration
 
+**Single confirm — no per-step prompts.**
+
 1. Print the REMOVE / EDIT / PRESERVE plan:
    - **REMOVE**: `.priv-storage/AI_PROJECT_SETUP.md`; `.priv-storage/.claude/{hooks,skills,output-styles,statusline}/*`; `.priv-storage/.claude/agents/{explorer,code-reviewer,log-analyzer}.md`; `.priv-storage/.claude/commands/{status,recover,ship,health,save,clean,codex-brief,codex-review,codex-fix,codex-relay-status}.md`; `tmp-igbkp/codex-relay-{check,run}.sh`; `.priv-storage/sessions/{codex-brief,codex-report,claude-review}.md` and `.priv-storage/sessions/codex-relay/`.
    - **EDIT**: `.priv-storage/CLAUDE.md` → slim to Section 1-7 + 11 only.
    - **PRESERVE**: `WORK_STATUS.md`, `memory/`, `sessions/{current,recovery,handoff-*}.md`, `.mcp.json`, `.gitignore`, `tmp-igbkp/{archive,restore,purge-history,verify-setup,uninstall,smoke-test-hooks,secret-guard,automode-validate,setup-worktree}.sh`, `.priv-storage/.claude/agents/tech-lead.md` + any `agents/*-team.md`.
-2. Prompt `Proceed? [Y/n]` — default Y on Enter, abort on `n`.
-3. Run `lib/migrate-from-md.sh "$PROJECT_ROOT"`.
+2. Prompt **once**: `Run all of the above without further prompts? [Y/n]` — default Y on Enter, abort on `n`.
+3. On confirm, call `lib/migrate-from-md.sh "$PROJECT_ROOT" --auto-confirm` — the `--auto-confirm` flag suppresses the script's internal prompt so the whole migration runs end-to-end without re-asking.
 4. Run `lib/verify-init.sh` after migration.
 
 Output: `init: migrated v5.x → v6.0 — removed <N>, preserved <M> — verify: PASS`
