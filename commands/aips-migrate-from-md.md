@@ -27,7 +27,7 @@ Same logic as `/aips:init` CASE B, but always runs migration — does not consul
    - **EDIT**: `.priv-storage/CLAUDE.md` slimmed to Section 1-7 + 11 only.
    - **PRESERVE**: `WORK_STATUS.md`, `memory/`, `sessions/{current,recovery,handoff-*}.md`, `.mcp.json`, `.gitignore`, `tmp-igbkp/{archive,restore,purge-history,verify-setup,uninstall,smoke-test-hooks,secret-guard,automode-validate,setup-worktree}.sh`, `.priv-storage/.claude/agents/tech-lead.md`, `.priv-storage/.claude/agents/*-team.md`.
 3. **Single confirm** — prompt **once**: `Run all of the above without further prompts? [Y/n]` (default Y).
-4. **Run** — `lib/migrate-from-md.sh "$TARGET" --auto-confirm` (the `--auto-confirm` flag suppresses the script's internal prompt so the whole migration runs end-to-end without re-asking).
+4. **Run** — `lib/upgrade.sh "$TARGET" --only-cleanup --auto-confirm` (the `--auto-confirm` flag suppresses the script's internal prompt so the whole migration runs end-to-end without re-asking). The legacy `lib/migrate-from-md.sh` name is a thin backward-compat wrapper for the same call.
 5. **Verify** — `lib/verify-init.sh "$TARGET"` and report PASS/FAIL.
 
 ## Output

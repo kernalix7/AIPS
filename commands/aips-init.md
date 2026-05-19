@@ -26,8 +26,8 @@ Classify `PROJECT_ROOT` into one of 4 cases:
 | Case | Signal | Action |
 |------|--------|--------|
 | **A — Fresh** | `.priv-storage/` does NOT exist | Full fresh init |
-| **B — v5.x legacy** | `.priv-storage/AI_PROJECT_SETUP.md` exists | Migration plan + single confirm + `lib/migrate-from-md.sh --auto-confirm` |
-| **C — version-aware re-init / upgrade** | `.priv-storage/` exists, NO `AI_PROJECT_SETUP.md` inside | Read `.priv-storage/.aips-version`. If older than plugin → run upgrade-to-v7.sh + write current marker. If equal → idempotent re-init. |
+| **B — v5.x legacy** | `.priv-storage/AI_PROJECT_SETUP.md` exists | Migration plan + single confirm + `lib/upgrade.sh --only-cleanup --auto-confirm` (legacy alias: `lib/migrate-from-md.sh`) |
+| **C — version-aware re-init / upgrade** | `.priv-storage/` exists, NO `AI_PROJECT_SETUP.md` inside | Read `.priv-storage/.aips-version`. If older than plugin → run `lib/upgrade.sh` (legacy alias: `lib/upgrade-to-v7.sh`) + write current marker. If equal → idempotent re-init. |
 | **D — Repair** | `.priv-storage/` partially present, OR root `CLAUDE.md` exists but `.priv-storage/` missing, OR broken symlinks | Detect missing files, restore from templates only — never overwrite user content |
 
 ## CASE A — Fresh project
@@ -54,7 +54,7 @@ Output: `init: fresh — <lang>/<framework> — <N> files written — verify: PA
    - **STRIP**: `.hooks` and `.statusLine` keys from `.priv-storage/.claude/settings.json` (backup `.v5.bak`) — global plugin owns both.
    - **PRESERVE**: `WORK_STATUS.md`, `memory/`, `sessions/{current,recovery,handoff-*}.md`, `.mcp.json`, `.gitignore`, `tmp-igbkp/{archive,restore,purge-history,verify-setup,uninstall,smoke-test-hooks,secret-guard,automode-validate,setup-worktree}.sh`, `.priv-storage/.claude/agents/tech-lead.md` + any `agents/*-team.md`.
 2. Prompt **once**: `Run all of the above without further prompts? [Y/n]` — default Y on Enter, abort on `n`.
-3. On confirm, call `bash "$AIPS_ROOT/lib/migrate-from-md.sh" "$PROJECT_ROOT" --auto-confirm` — the `--auto-confirm` flag suppresses the script's internal prompt so the whole migration runs end-to-end without re-asking.
+3. On confirm, call `bash "$AIPS_ROOT/lib/upgrade.sh" "$PROJECT_ROOT" --only-cleanup --auto-confirm` — the `--auto-confirm` flag suppresses the script's internal prompt so the whole migration runs end-to-end without re-asking. (`lib/migrate-from-md.sh` is a thin backward-compat wrapper for the same call.)
 4. Run `bash "$AIPS_ROOT/lib/verify-init.sh" "$PROJECT_ROOT"` after migration.
 
 Output: `init: migrated v5.x → v7.0 — removed <N>, preserved <M> — verify: PASS`
@@ -72,9 +72,9 @@ Output: `init: migrated v5.x → v7.0 — removed <N>, preserved <M> — verify:
      - Re-validate symlinks and `.gitignore` block.
      - Re-write marker to the full plugin version read from `"$AIPS_ROOT/.claude-plugin/plugin.json"` (never hardcode).
    - **CUR < PLUGIN (project marker older than plugin)** → upgrade in place:
-     - Print a one-line summary: `upgrade: detected v$CUR, plugin v$PLUGIN — running upgrade-to-v7.sh`.
+     - Print a one-line summary: `upgrade: detected v$CUR, plugin v$PLUGIN — running lib/upgrade.sh`.
      - Single prompt: `Run v$CUR → v$PLUGIN upgrade now? [Y/n]` (default Y).
-     - On confirm: `bash "$AIPS_ROOT/lib/upgrade-to-v7.sh" "$PROJECT_ROOT"` (strict by default — globalizes toolkit + gitignore, drops local memory copy after global mirror verified, clears local sessions/*.md after global mirror verified, slims CLAUDE.md, writes marker `7.0`).
+     - On confirm: `bash "$AIPS_ROOT/lib/upgrade.sh" "$PROJECT_ROOT"` (strict by default — globalizes toolkit + gitignore, drops local memory copy after global mirror verified, clears local sessions/*.md after global mirror verified, slims CLAUDE.md, writes the marker to the current plugin version). The legacy `lib/upgrade-to-v7.sh` is a thin backward-compat wrapper for the same call.
      - Then run `bash "$AIPS_ROOT/lib/verify-init.sh" "$PROJECT_ROOT"`.
    - **CUR > PLUGIN (project marker ahead of plugin)** → STOP and warn: user is running an older plugin against a newer project. Prompt them to run `curl -fsSL https://raw.githubusercontent.com/kernalix7/AIPS/main/install.sh | bash` to refresh the global plugin install.
 

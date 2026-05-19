@@ -65,7 +65,7 @@ When invoked as `/aips:upgrade --to v7.0` (or `/aips:upgrade --to v7.0 $ARGUMENT
 
 ### Plan preview
 
-Print the upgrade plan from `lib/upgrade-to-v7.sh --plan` (the PLAN block):
+Print the upgrade plan from `lib/upgrade.sh --plan` (the PLAN block). The legacy `lib/upgrade-to-v7.sh` name is a thin backward-compat wrapper for the same call.
 
 ```
 [plan] backup    → tmp-igbkp/upgrade-v7-backup-{ts}/
@@ -86,7 +86,9 @@ Prompt `Proceed? [Y/n]` (default Y).
 On confirm:
 
 ```bash
-UPGRADE_SH="$(find ~/.claude/plugins/cache/AIPS/AIPS/lib -name upgrade-to-v7.sh 2>/dev/null | head -1)"
+UPGRADE_SH="$(find ~/.claude/plugins/cache/AIPS/AIPS/lib -name upgrade.sh 2>/dev/null | head -1)"
+[ -z "$UPGRADE_SH" ] && UPGRADE_SH="$(find ~/.claude/plugins -name upgrade.sh -path '*/AIPS/*' 2>/dev/null | head -1)"
+# Backward-compat fallback if running against an older plugin install:
 [ -z "$UPGRADE_SH" ] && UPGRADE_SH="$(find ~/.claude/plugins -name upgrade-to-v7.sh 2>/dev/null | head -1)"
 bash "$UPGRADE_SH" "$(pwd)"
 ```
