@@ -94,7 +94,7 @@ EOF
   fi
   cat <<EOF
 [plan] CLAUDE.md → trim Sections 8–13 ref comments (re-render via lib/render-claude-md.sh)
-[plan] marker    → write $MARKER ← 7.0
+[plan] marker    → write $MARKER ← \${PLUGIN_VER}
 EOF
 }
 
@@ -104,14 +104,43 @@ if [ "$PLAN_ONLY" -eq 1 ]; then
 fi
 
 # ---------------------------------------------------------------------------
-# 1. pre-check: must be v6.0
+# 1. pre-check: project should be on a pre-hybrid layout
 # ---------------------------------------------------------------------------
+# Plugin version (target) read dynamically from the manifest next to this lib.
+PLUGIN_JSON="$(cd "$LIB_DIR/.." && pwd)/.claude-plugin/plugin.json"
+PLUGIN_VER="unknown"
+if [ -f "$PLUGIN_JSON" ]; then
+  if command -v jq >/dev/null 2>&1; then
+    PLUGIN_VER="$(jq -r '.version // "unknown"' "$PLUGIN_JSON")"
+  else
+    PLUGIN_VER="$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$PLUGIN_JSON" | head -1)"
+    [ -z "$PLUGIN_VER" ] && PLUGIN_VER="unknown"
+  fi
+fi
+log "target plugin version: $PLUGIN_VER"
+
+# Compare semver major.minor. Returns 0 if $1 == $2, 1 if $1 < $2, 2 if $1 > $2.
+ver_cmp_mm() {
+  local a="${1%%.*}" b="${2%%.*}"
+  local arest="${1#*.}" brest="${2#*.}"
+  local a_min="${arest%%.*}" b_min="${brest%%.*}"
+  [ -z "$a_min" ] || ! [ "$a_min" -eq "$a_min" ] 2>/dev/null && a_min=0
+  [ -z "$b_min" ] || ! [ "$b_min" -eq "$b_min" ] 2>/dev/null && b_min=0
+  [ -z "$a" ] || ! [ "$a" -eq "$a" ] 2>/dev/null && a=0
+  [ -z "$b" ] || ! [ "$b" -eq "$b" ] 2>/dev/null && b=0
+  if [ "$a" -lt "$b" ]; then return 1; fi
+  if [ "$a" -gt "$b" ]; then return 2; fi
+  if [ "$a_min" -lt "$b_min" ]; then return 1; fi
+  if [ "$a_min" -gt "$b_min" ]; then return 2; fi
+  return 0
+}
+
 detect_version() {
   if [ -f "$MARKER" ]; then
     cat "$MARKER" | tr -d '[:space:]'
     return
   fi
-  # No marker: assume v6.0 if Section 1-7+11 layout present.
+  # No marker: assume v6.0 if Section 1-7+11 layout present (post v5.x migration).
   if [ -f "$PRIV/CLAUDE.md" ] && grep -q '^## 11\.' "$PRIV/CLAUDE.md" 2>/dev/null \
      && ! grep -q '^## 13\.' "$PRIV/CLAUDE.md" 2>/dev/null; then
     echo "6.0"
@@ -123,12 +152,24 @@ detect_version() {
 CUR_VER="$(detect_version)"
 log "detected current version: $CUR_VER"
 
-if [ "$CUR_VER" = "7.0" ]; then
-  log "already on v7.0 — no-op"
-  exit 0
+if [ "$PLUGIN_VER" != "unknown" ]; then
+  # Already on the target version (any patch) → no-op.
+  if [ "${CUR_VER%%.*}.${CUR_VER#*.}" = "${PLUGIN_VER%%.*}.${PLUGIN_VER#*.}" ] 2>/dev/null; then :; fi
+  if ver_cmp_mm "$CUR_VER" "$PLUGIN_VER"; then
+    log "already on target v$PLUGIN_VER (project marker v$CUR_VER) — no-op"
+    exit 0
+  fi
+  # Project newer than plugin? Refuse to downgrade.
+  ver_cmp_mm "$CUR_VER" "$PLUGIN_VER" || true
+  case $? in
+    2) err "project marker v$CUR_VER is newer than plugin v$PLUGIN_VER. Refusing to downgrade. Update the plugin first."; exit 1 ;;
+  esac
 fi
-if [ "$CUR_VER" != "6.0" ] && [ "$FORCE" -ne 1 ]; then
-  err "pre-check failed: expected v6.0, found '$CUR_VER'. Re-run with --force to override."
+
+# Anything else: proceed with the v5/v6 → v7 hybrid migration, gated by --force
+# only when the layout is truly unrecognized.
+if [ "$CUR_VER" = "unknown" ] && [ "$FORCE" -ne 1 ]; then
+  err "pre-check failed: could not detect a v6.0 layout. Re-run with --force to override."
   exit 1
 fi
 
@@ -300,9 +341,9 @@ fi
 # ---------------------------------------------------------------------------
 if [ "$DRY_RUN" -ne 1 ]; then
   mkdir -p "$PRIV"
-  printf '7.0\n' > "$MARKER"
+  printf '%s\n' "$PLUGIN_VER" > "$MARKER"
 fi
-log "marker     $MARKER = 7.0"
+log "marker     $MARKER = $PLUGIN_VER"
 
 # ---------------------------------------------------------------------------
 # 9. report
@@ -314,6 +355,6 @@ cat <<EOF
 [upgrade-v7] backup     $BACKUP_DIR ($BACKUP_COUNT items)
 [upgrade-v7] globalized $GLOBAL_FILES files → ~/.claude/
 [upgrade-v7] preserved  $PRESERVED files (per-project AIPS bits)
-[upgrade-v7] marker     $MARKER = 7.0
-Upgraded to v7.0 — $GLOBAL_FILES files globalized, $PRESERVED files preserved, backup at $BACKUP_DIR
+[upgrade-v7] marker     $MARKER = $PLUGIN_VER
+Upgraded to v$PLUGIN_VER — $GLOBAL_FILES files globalized, $PRESERVED files preserved, backup at $BACKUP_DIR
 EOF

@@ -100,7 +100,7 @@ declare -a REMOVE_DIRS=(
 )
 
 # ---------- PLAN ----------
-log "AIPS v5.x → v6.0 migration plan for: $ROOT"
+log "AIPS v5.x migration plan for: $ROOT"
 echo
 echo "REMOVE (files):"
 for f in "${REMOVE_FILES[@]}"; do
@@ -232,10 +232,21 @@ fi
 # ---------- write version marker ----------
 if [ "$DRY_RUN" = "0" ]; then
   mkdir -p "$ROOT/.priv-storage"
-  printf '6.0\n' > "$ROOT/.priv-storage/.aips-version"
-  ok "wrote .priv-storage/.aips-version (6.0)"
+  # Read current plugin version from the manifest next to this script.
+  PLUGIN_JSON="$(cd "$(dirname "$0")/.." && pwd)/.claude-plugin/plugin.json"
+  PLUGIN_VER="unknown"
+  if [ -f "$PLUGIN_JSON" ]; then
+    if command -v jq >/dev/null 2>&1; then
+      PLUGIN_VER="$(jq -r '.version // "unknown"' "$PLUGIN_JSON")"
+    else
+      PLUGIN_VER="$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$PLUGIN_JSON" | head -1)"
+      [ -z "$PLUGIN_VER" ] && PLUGIN_VER="unknown"
+    fi
+  fi
+  printf '%s\n' "$PLUGIN_VER" > "$ROOT/.priv-storage/.aips-version"
+  ok "wrote .priv-storage/.aips-version ($PLUGIN_VER)"
 else
-  printf "  [dry-run] echo 6.0 > .priv-storage/.aips-version\n"
+  printf "  [dry-run] echo <plugin.version> > .priv-storage/.aips-version\n"
 fi
 
 # ---------- count preserved (best-effort) ----------

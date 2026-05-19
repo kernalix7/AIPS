@@ -27,7 +27,7 @@ Classify `PROJECT_ROOT` into one of 4 cases:
 |------|--------|--------|
 | **A — Fresh** | `.priv-storage/` does NOT exist | Full fresh init |
 | **B — v5.x legacy** | `.priv-storage/AI_PROJECT_SETUP.md` exists | Migration plan + single confirm + `lib/migrate-from-md.sh --auto-confirm` |
-| **C — v7.0 re-init** | `.priv-storage/` exists, NO `AI_PROJECT_SETUP.md` inside, root `CLAUDE.md` symlink valid | Idempotent re-init (non-destructive sync of global templates) |
+| **C — version-aware re-init / upgrade** | `.priv-storage/` exists, NO `AI_PROJECT_SETUP.md` inside | Read `.priv-storage/.aips-version`. If older than plugin → run upgrade-to-v7.sh + write current marker. If equal → idempotent re-init. |
 | **D — Repair** | `.priv-storage/` partially present, OR root `CLAUDE.md` exists but `.priv-storage/` missing, OR broken symlinks | Detect missing files, restore from templates only — never overwrite user content |
 
 ## CASE A — Fresh project
@@ -39,7 +39,7 @@ Classify `PROJECT_ROOT` into one of 4 cases:
 5. Create root symlinks if absent: `CLAUDE.md → .priv-storage/CLAUDE.md`, `AGENTS.md → .priv-storage/CLAUDE.md`, `.cursorrules → .priv-storage/CLAUDE.md`, `.vscode/settings.json → .priv-storage/.vscode/settings.json` (create `.priv-storage/.vscode/settings.json` if absent first).
 6. `mkdir -p tmp-igbkp && cp "$AIPS_ROOT/templates/tmp-igbkp/"*.sh tmp-igbkp/ && chmod +x tmp-igbkp/*.sh` (project-local toolkit; v7.0 hybrid will later globalize via `/aips:upgrade --to v7.0`).
 7. Patch `.gitignore` idempotently: if marker `# === AIPS v7.0 ===` absent, append the block from `$AIPS_ROOT/templates/.gitignore.patch`.
-8. Write marker: `echo 7.0 > .priv-storage/.aips-version`.
+8. Write marker with the current plugin version (read it from `"$AIPS_ROOT/.claude-plugin/plugin.json"`): `jq -r .version "$AIPS_ROOT/.claude-plugin/plugin.json" > .priv-storage/.aips-version`. Falls back to `sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'` if `jq` is absent.
 9. Run `bash "$AIPS_ROOT/lib/verify-init.sh" "$PROJECT_ROOT"` for PASS/FAIL summary.
 
 Output: `init: fresh — <lang>/<framework> — <N> files written — verify: PASS`
@@ -59,13 +59,27 @@ Output: `init: fresh — <lang>/<framework> — <N> files written — verify: PA
 
 Output: `init: migrated v5.x → v7.0 — removed <N>, preserved <M> — verify: PASS`
 
-## CASE C — v7.0 re-init (idempotent)
+## CASE C — version-aware re-init / upgrade
 
-1. For each managed template under `$AIPS_ROOT/templates/`, diff vs the project copy. Apply only non-destructive updates (skeleton headers, missing toolkit scripts in `tmp-igbkp/`). NEVER overwrite `WORK_STATUS.md` body, `memory/*.md` content, or `sessions/*`.
-2. Re-validate symlinks and `.gitignore` block.
-3. Re-write `.priv-storage/.aips-version` to current plugin version (currently `7.0`).
+**Detect first, then route based on version delta.**
+
+1. Read the project marker: `CUR="$(cat .priv-storage/.aips-version 2>/dev/null | tr -d '[:space:]')"`. Empty = assume `6.0`.
+2. Read the plugin version: `PLUGIN="$(jq -r .version "$AIPS_ROOT/.claude-plugin/plugin.json")"`. Trim to major.minor (e.g. `7.0`).
+3. Compare:
+   - **CUR == PLUGIN (same major.minor)** → idempotent re-init only:
+     - For each managed template under `$AIPS_ROOT/templates/`, diff vs the project copy and apply non-destructive updates (skeleton headers, missing toolkit scripts in `tmp-igbkp/`).
+     - NEVER overwrite `WORK_STATUS.md` body, `memory/*.md` content, or `sessions/*`.
+     - Re-validate symlinks and `.gitignore` block.
+     - Re-write marker to the full plugin version read from `"$AIPS_ROOT/.claude-plugin/plugin.json"` (never hardcode).
+   - **CUR < PLUGIN (project marker older than plugin)** → upgrade in place:
+     - Print a one-line summary: `upgrade: detected v$CUR, plugin v$PLUGIN — running upgrade-to-v7.sh`.
+     - Single prompt: `Run v$CUR → v$PLUGIN upgrade now? [Y/n]` (default Y).
+     - On confirm: `bash "$AIPS_ROOT/lib/upgrade-to-v7.sh" "$PROJECT_ROOT"` (strict by default — globalizes toolkit + gitignore, drops local memory copy after global mirror verified, clears local sessions/*.md after global mirror verified, slims CLAUDE.md, writes marker `7.0`).
+     - Then run `bash "$AIPS_ROOT/lib/verify-init.sh" "$PROJECT_ROOT"`.
+   - **CUR > PLUGIN (project marker ahead of plugin)** → STOP and warn: user is running an older plugin against a newer project. Prompt them to run `curl -fsSL https://raw.githubusercontent.com/kernalix7/AIPS/main/install.sh | bash` to refresh the global plugin install.
 
 Output: `init: re-init — <N> templates updated, <M> preserved — verify: PASS`
+   or: `init: upgraded v<CUR> → v<PLUGIN> — <N> globalized, <M> preserved — verify: PASS`
 
 ## CASE D — Repair
 
